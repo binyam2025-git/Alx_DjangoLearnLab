@@ -8,7 +8,7 @@
 
 from bookshelf.models import Book
 
-retrieved\_book = Book.objects.get(title="1984")
+retrieved_book = Book.objects.get(title="1984")
 
 print(retrieved\_book.title)
 
