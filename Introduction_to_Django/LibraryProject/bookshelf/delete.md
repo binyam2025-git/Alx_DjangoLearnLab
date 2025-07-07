@@ -1,16 +1,9 @@
-\# Delete Book Instance
+# Delete Book Instance
 
-
-
-\## Command:
-
+## Command:
 ```python
-
 from bookshelf.models import Book
-
-book\_to\_delete = Book.objects.get(title="Nineteen Eighty-Four")
-
-book\_to\_delete.delete()
-
-Book.objects.all()
+book = Book.objects.get(title="Nineteen Eighty-Four") # Retrieve the book using its updated title
+book.delete() # Delete the book instance
+Book.objects.all() # Confirm deletion by checking all books
 
