@@ -18,8 +18,8 @@ urlpatterns = [
     # Librarians
     path('librarians/<int:pk>/', views.librarian_detail_view, name='librarian_detail'),
 
-    # Books (List) - This path remains as it's not part of the specific error
-    path('books/', views.book_list_view, name='book_list'),
+    # Books (List)
+    path('books/', views.book_list_view, name='book_list'), # Matches views.py's book_list_view
 
     # Authentication Paths
     path('login/', auth_views.LoginView.as_view(template_name='relationship_app/login.html'), name='login'),
@@ -31,8 +31,7 @@ urlpatterns = [
     path('librarian-only/', views.librarian_view, name='librarian_view'),
     path('member-only/', views.member_view, name='member_view'),
 
-    # --- Book Management with Custom Permissions - CORRECTED PATHS FOR CHECKER ---
-    # These paths link to the new views that enforce permissions
+    # --- Book Management with Custom Permissions ---
     path('add_book/', views.book_add_view, name='book_add'),
     path('edit_book/<int:pk>/', views.book_edit_view, name='book_edit'),
     path('delete_book/<int:pk>/', views.book_delete_view, name='book_delete'),

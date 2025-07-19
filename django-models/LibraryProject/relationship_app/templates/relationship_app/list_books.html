@@ -1,12 +1,15 @@
-<h1>All Books</h1>
-<ul>
-    {% for book in books %}
-        <li>
-            {{ book.title }} by {{ book.author.name }}
-            {% if book.library %}(at <a href="{% url 'relationship_app:library_detail' book.library.pk %}">{{ book.library.name }}</a>){% endif %}
-        </li>
-    {% empty %}
-        <li>No books found.</li>
-    {% endfor %}
-</ul>
-<p><a href="{% url 'home' %}">Back to Home</a></p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>List of Books</title>
+</head>
+<body>
+    <h1>Books Available:</h1>
+    <ul>
+        {% for book in books %}
+        <li>{{ book.title }} by {{ book.author.name }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

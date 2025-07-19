@@ -1,14 +1,30 @@
 # relationship_app/views.py
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.views.generic.list import ListView
-from django.views.generic.detail import DetailView
-from .models import Author, Book, Library, Librarian
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login as auth_login
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.decorators import permission_required
-from django.urls import reverse_lazy
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
+from django.urls import reverse_lazy # Ensure this is imported for redirecting
+from .models import Author, Book, Library, Librarian, UserProfile # Ensure UserProfile is here
+from django.views.generic import DetailView # For the class-based view
+from django.contrib.auth.forms import UserCreationForm # Ensure this is here for register_view
+from django.contrib.auth import login as auth_login # Ensure this is here for register_view
+from django.views.generic.list import ListView # Keep ListView if you have other list views or for completeness
+
+# Helper functions for role checks (from previous tasks, keep them)
+def is_admin(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
+
+def is_librarian(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
+
+def is_member(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
+
+# --- Existing Views from Previous Tasks (ensure these are present) ---
+
+# Example: A simple home view if you have one
+# Adjust template name as per your setup - if you don't have a 'home.html' remove this or create one.
+def home_view(request):
+    return render(request, 'relationship_app/home.html')
 
 # --- Function-Based View: List all Authors ---
 def author_list_view(request):
@@ -32,11 +48,19 @@ def library_list_view(request):
     }
     return render(request, 'relationship_app/library_list.html', context)
 
-# --- Class-Based View: Library Detail ---
+# --- Class-based View for Library Details (Corrected/Updated for this task) ---
 class LibraryDetailView(DetailView):
     model = Library
     template_name = 'relationship_app/library_detail.html'
     context_object_name = 'library'
+
+    # Ensure books are pre-fetched if you iterate over library.books.all() in template
+    def get_queryset(self):
+        return Library.objects.prefetch_related('books__author') # Prefetch books and their authors
+
+    # No need to override get_context_data unless adding more to context,
+    # as DetailView automatically puts `self.object` into context as `library` (due to context_object_name)
+
 
 # --- Function-Based View: Librarian Detail ---
 def librarian_detail_view(request, pk):
@@ -46,14 +70,6 @@ def librarian_detail_view(request, pk):
     }
     return render(request, 'relationship_app/librarian_detail.html', context)
 
-# --- Function-Based View: List all Books ---
-def book_list_view(request):
-    books = Book.objects.all().order_by('title')
-    context = {
-        'books': books
-    }
-    return render(request, 'relationship_app/list_books.html', context)
-
 # --- Function-Based View: User Registration ---
 def register_view(request):
     if request.method == 'POST':
@@ -61,24 +77,14 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             auth_login(request, user)
-            return redirect('home')
+            return redirect('home') # Ensure 'home' URL name exists in your project
     else:
         form = UserCreationForm()
     context = {'form': form}
     return render(request, 'relationship_app/register.html', context)
 
-# Helper functions for role checks
-def is_admin(user):
-    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
 
-def is_librarian(user):
-    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
-
-def is_member(user):
-    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
-
-# --- Role-Based Views ---
-
+# --- Role-Based Views (from previous tasks, keep them) ---
 @login_required
 @user_passes_test(is_admin)
 def admin_view(request):
@@ -94,22 +100,20 @@ def librarian_view(request):
 def member_view(request):
     return render(request, 'relationship_app/member_view.html')
 
-# --- Book Management Views with Custom Permissions ---
+# --- Book Management Views with Custom Permissions (from previous tasks, keep them) ---
 @permission_required('relationship_app.can_add_book', raise_exception=True)
 def book_add_view(request):
-    # In a real application, you'd use a form here (e.g., BookForm)
     if request.method == 'POST':
-        # Process form data, save book
-        return redirect('book_list') # Redirect to book list after adding
+        # In a real app: process form, save book
+        return redirect('list_books') # Redirect to the new list_books URL
     return render(request, 'relationship_app/book_add.html', {'message': 'Add Book Page'})
 
 @permission_required('relationship_app.can_change_book', raise_exception=True)
 def book_edit_view(request, pk):
     book = get_object_or_404(Book, pk=pk)
-    # In a real application, you'd use a form here (e.g., BookForm with instance=book)
     if request.method == 'POST':
-        # Process form data, update book
-        return redirect('book_detail', pk=book.pk) # Redirect to book detail after editing
+        # In a real app: process form, update book
+        return redirect('list_books') # Redirect to list_books for simplicity
     return render(request, 'relationship_app/book_edit.html', {'book': book, 'message': f'Edit Book Page for {book.title}'})
 
 @permission_required('relationship_app.can_delete_book', raise_exception=True)
@@ -117,5 +121,14 @@ def book_delete_view(request, pk):
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
         book.delete()
-        return redirect('book_list') # Redirect to book list after deletion
+        return redirect('list_books') # Redirect to list_books for simplicity
     return render(request, 'relationship_app/book_confirm_delete.html', {'book': book, 'message': f'Confirm Delete for {book.title}'})
+
+# --- NEW VIEWS FOR THIS TASK ---
+# Function-based View for Listing Books (Replaces old book_list_view)
+def list_books_view(request):
+    books = Book.objects.all().select_related('author') # Optimizes query to get author name
+    context = {'books': books}
+    return render(request, 'relationship_app/list_books.html', context)
+
+# Note: The LibraryDetailView is defined above, moved to its "corrected" location.
