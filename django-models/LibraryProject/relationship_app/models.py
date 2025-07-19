@@ -1,6 +1,9 @@
 # relationship_app/models.py
 
 from django.db import models
+from django.contrib.auth.models import User # Import Django's built-in User model
+from django.db.models.signals import post_save # Import signal for automatic profile creation
+from django.dispatch import receiver # Import receiver decorator for signals
 
 class Author(models.Model):
     name = models.CharField(max_length=100)
@@ -31,3 +34,16 @@ class Librarian(models.Model):
 
     def __str__(self):
         return self.name
+
+# UserProfile Model for Role-Based Access Control
+class UserProfile(models.Model):
+    ROLE_CHOICES = (
+        ('Admin', 'Admin'),
+        ('Librarian', 'Librarian'),
+        ('Member', 'Member'),
+    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='Member')
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile ({self.role})"

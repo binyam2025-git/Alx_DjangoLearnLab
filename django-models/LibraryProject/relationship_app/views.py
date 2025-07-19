@@ -12,6 +12,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login as auth_login # Rename login to avoid conflict with a variable
 from django.shortcuts import redirect # Already imported if using render, but good to be explicit for redirect
 
+# relationship_app/views.py
+
+# ... existing imports ...
+from django.contrib.auth.decorators import login_required, user_passes_test
+
 # --- Function-Based View: List all Authors ---
 def author_list_view(request):
     authors = Author.objects.all().order_by('name')
@@ -86,3 +91,30 @@ def register_view(request):
         form = UserCreationForm()
     context = {'form': form}
     return render(request, 'relationship_app/register.html', context)
+
+# Helper functions for role checks
+def is_admin(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
+
+def is_librarian(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
+
+def is_member(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
+
+# --- Role-Based Views ---
+
+@login_required # Ensures user is logged in
+@user_passes_test(is_admin) # Ensures user has 'Admin' role
+def admin_view(request):
+    return render(request, 'relationship_app/admin_view.html')
+
+@login_required # Ensures user is logged in
+@user_passes_test(is_librarian) # Ensures user has 'Librarian' role
+def librarian_view(request):
+    return render(request, 'relationship_app/librarian_view.html')
+
+@login_required # Ensures user is logged in
+@user_passes_test(is_member) # Ensures user has 'Member' role
+def member_view(request):
+    return render(request, 'relationship_app/member_view.html')
