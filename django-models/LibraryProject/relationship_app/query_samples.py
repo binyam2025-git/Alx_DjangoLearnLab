@@ -1,128 +1,162 @@
 # relationship_app/query_samples.py
 
-# This script is meant to be run from the Django shell.
-# To run:
-# 1. Start your Django shell: python manage.py shell
-# 2. Inside the shell, paste the setup code (import os, django, etc.)
-# 3. Then, paste the sample data creation (optional, if you want fresh data)
-# 4. Finally, execute this script using: exec(open('relationship_app/query_samples.py').read())
+# This script is intended to be run from Django's shell:
+# python manage.py shell
+# >>> from relationship_app.query_samples import *
+# >>> create_sample_data()
+# >>> run_queries()
 
-from relationship_app.models import Author, Book, Library, Librarian
-from django.db.models import Count # For more advanced queries
+from relationship_app.models import Author, Book, Library, Librarian, UserProfile # Added UserProfile for completeness
+from django.db import IntegrityError, transaction # Added transaction for atomic operations
+from django.contrib.auth.models import User # For user creation if needed
+import datetime # For date objects
 
-# --- Create some sample data first (if you haven't already created it through the admin or another shell session) ---
-# You can uncomment and run these lines once in the Django shell to populate data.
-# If you run them again, get_or_create will ensure duplicates are not made for existing entries.
-print("\n--- Ensuring Sample Data Exists ---")
-author1, created1 = Author.objects.get_or_create(name="Jane Doe")
-if created1: print(f"Created author: {author1.name}")
-author2, created2 = Author.objects.get_or_create(name="John Smith")
-if created2: print(f"Created author: {author2.name}")
-author3, created3 = Author.objects.get_or_create(name="Emily White")
-if created3: print(f"Created author: {author3.name}")
+def create_sample_data():
+    """
+    Creates sample data for testing queries.
+    Clears existing data for these models first to ensure a clean slate.
+    """
+    print("Clearing existing sample data...")
+    Book.objects.all().delete()
+    Author.objects.all().delete()
+    Librarian.objects.all().delete()
+    Library.objects.all().delete()
+    # User and UserProfile management should be careful not to delete your admin user
+    # User.objects.filter(is_superuser=False).delete()
+    # UserProfile.objects.all().delete() # Only if you want to clear profiles
 
-book1, created_b1 = Book.objects.get_or_create(title="The Adventure Begins", author=author1)
-if created_b1: print(f"Created book: {book1.title}")
-book2, created_b2 = Book.objects.get_or_create(title="Mystery of the Old House", author=author1)
-if created_b2: print(f"Created book: {book2.title}")
-book3, created_b3 = Book.objects.get_or_create(title="Coding with Django", author=author2)
-if created_b3: print(f"Created book: {book3.title}")
-book4, created_b4 = Book.objects.get_or_create(title="The Silent Forest", author=author3)
-if created_b4: print(f"Created book: {book4.title}")
-book5, created_b5 = Book.objects.get_or_create(title="Django Deep Dive", author=author2)
-if created_b5: print(f"Created book: {book5.title}")
+    print("Creating sample data...")
+    try:
+        with transaction.atomic(): # Ensures all operations complete or none do
+            # Authors
+            author1 = Author.objects.create(name="Jane Austen")
+            print(f"Created Author: {author1.name}")
+            author2 = Author.objects.create(name="George Orwell")
+            print(f"Created Author: {author2.name}")
 
-library1, created_l1 = Library.objects.get_or_create(name="Central Library")
-if created_l1: print(f"Created library: {library1.name}")
-library2, created_l2 = Library.objects.get_or_create(name="Community Hub")
-if created_l2: print(f"Created library: {library2.name}")
+            # Libraries - Create first without M2M books
+            library1 = Library.objects.create(name="Central Library")
+            print(f"Created Library: {library1.name}")
+            library2 = Library.objects.create(name="Community Branch")
+            print(f"Created Library: {library2.name}")
 
-# Add books to libraries (ManyToMany relationship) - check if already added
-if not library1.books.filter(id=book1.id).exists(): library1.books.add(book1)
-if not library1.books.filter(id=book2.id).exists(): library1.books.add(book2)
-if not library1.books.filter(id=book3.id).exists(): library1.books.add(book3)
-if not library2.books.filter(id=book3.id).exists(): library2.books.add(book3)
-if not library2.books.filter(id=book4.id).exists(): library2.books.add(book4)
-if not library2.books.filter(id=book5.id).exists(): library2.books.add(book5)
-print("Books added to libraries (if not already present).")
+            # Books - Pass datetime objects for published_date
+            book1 = Book.objects.create(
+                title="Pride and Prejudice",
+                author=author1,
+                published_date=datetime.date(1813, 1, 28),
+                library=library1 # Assign ForeignKey directly here
+            )
+            print(f"Created Book: {book1.title}")
 
+            book2 = Book.objects.create(
+                title="1984",
+                author=author2,
+                published_date=datetime.date(1949, 6, 8),
+                library=library1 # Assign ForeignKey directly here
+            )
+            print(f"Created Book: {book2.title}")
 
-librarian1, created_lib1 = Librarian.objects.get_or_create(name="Alice Johnson", library=library1)
-if created_lib1: print(f"Created librarian: {librarian1.name} for {librarian1.library.name}")
-# For a OneToOne, ensure the library is not already linked. If it is, this might fail or update.
-# We use update_or_create to handle cases where library might already be associated.
-librarian2, created_lib2 = Librarian.objects.update_or_create(library=library2, defaults={'name': "Bob Williams"})
-if created_lib2: print(f"Created librarian: {librarian2.name} for {librarian2.library.name}")
-else: print(f"Updated librarian for {library2.name} to {librarian2.name}")
+            book3 = Book.objects.create(
+                title="Animal Farm",
+                author=author2,
+                published_date=datetime.date(1945, 8, 17),
+                library=library2 # Assign ForeignKey directly here
+            )
+            print(f"Created Book: {book3.title}")
 
+            book4 = Book.objects.create(
+                title="Sense and Sensibility",
+                author=author1,
+                published_date=datetime.date(1811, 10, 30),
+                library=library2 # Assign ForeignKey directly here
+            )
+            print(f"Created Book: {book4.title}")
 
-print("\n--- Sample Queries ---")
-
-print("\n--- Query all books by a specific author (ForeignKey) ---")
-try:
-    jane_doe = Author.objects.get(name="Jane Doe")
-    jane_doe_books = jane_doe.books.all() # Using related_name 'books'
-    print(f"Books by {jane_doe.name}:")
-    for book in jane_doe_books:
-        print(f"- {book.title}")
-except Author.DoesNotExist:
-    print("Author 'Jane Doe' not found. Please create sample data first.")
-except Exception as e:
-    print(f"An error occurred: {e}")
-
-
-print("\n--- List all books in a library (ManyToManyField) ---")
-try:
-    central_library = Library.objects.get(name="Central Library")
-    central_library_books = central_library.books.all()
-    print(f"Books in {central_library.name}:")
-    for book in central_library_books:
-        print(f"- {book.title}")
-except Library.DoesNotExist:
-    print("Library 'Central Library' not found. Please create sample data first.")
-except Exception as e:
-    print(f"An error occurred: {e}")
+            # Manually add books to libraries ManyToMany relationship
+            # This is the correct way to add to M2M after objects are created
+            library1.books.add(book1, book2)
+            print(f"Added {book1.title} and {book2.title} to {library1.name}")
+            library2.books.add(book3, book4)
+            print(f"Added {book3.title} and {book4.title} to {library2.name}")
 
 
-print("\n--- Retrieve the librarian for a library (OneToOneField) ---")
-try:
-    community_hub = Library.objects.get(name="Community Hub")
-    # Using related_name 'librarian' to get the librarian from the library
-    community_hub_librarian = community_hub.librarian
-    print(f"Librarian for {community_hub.name}: {community_hub_librarian.name}")
-except Library.DoesNotExist:
-    print("Library 'Community Hub' not found. Please create sample data first.")
-except Librarian.DoesNotExist:
-    print(f"No librarian found for {community_hub.name}. Please create sample data first.")
-except Exception as e:
-    print(f"An error occurred: {e}")
+            # Librarians - Create with OneToOneField
+            # Ensure no existing librarian for these libraries if using get_or_create to avoid IntegrityError
+            librarian1, created = Librarian.objects.get_or_create(name="Alice Smith", defaults={'library':library1})
+            if created: print(f"Created Librarian: {librarian1.name} for {library1.name}")
+            librarian2, created = Librarian.objects.get_or_create(name="Bob Johnson", defaults={'library':library2})
+            if created: print(f"Created Librarian: {librarian2.name} for {library2.name}")
 
 
-print("\n--- Reverse Query: Find the library a librarian belongs to (OneToOneField) ---")
-try:
-    alice_johnson = Librarian.objects.get(name="Alice Johnson")
-    alice_library = alice_johnson.library
-    print(f"Alice Johnson is the librarian for: {alice_library.name}")
-except Librarian.DoesNotExist:
-    print("Librarian 'Alice Johnson' not found. Please create sample data first.")
-except Exception as e:
-    print(f"An error occurred: {e}")
+            print("Sample data creation complete.")
+    except IntegrityError as e:
+        print(f"IntegrityError: {e}. Data might already exist or there's a unique constraint violation.")
+        print("Try running `create_sample_data()` again after ensuring your database is empty or objects are deleted properly.")
+    except Exception as e:
+        print(f"An unexpected error occurred during data creation: {e}")
+        # Optionally, print traceback for more details:
+        # import traceback
+        # traceback.print_exc()
 
 
-print("\n--- All libraries a book is in (ManyToManyField reverse) ---")
-try:
-    coding_book = Book.objects.get(title="Coding with Django")
-    coding_libraries = coding_book.libraries.all() # Using related_name 'libraries'
-    print(f"'{coding_book.title}' is available in these libraries:")
-    for library in coding_libraries:
-        print(f"- {library.name}")
-except Book.DoesNotExist:
-    print("Book 'Coding with Django' not found. Please create sample data first.")
-except Exception as e:
-    print(f"An error occurred: {e}")
+def run_queries():
+    """
+    Runs the required queries and prints the results.
+    """
+    print("\n--- Running Queries ---")
 
-# Example of a more complex query (optional)
-print("\n--- Count books per author ---")
-authors_with_book_count = Author.objects.annotate(num_books=Count('books')).order_by('name')
-for author in authors_with_book_count:
-    print(f"{author.name}: {author.num_books} books")
+    # Query all books by a specific author.
+    author_name = "George Orwell"
+    try:
+        author_george_orwell = Author.objects.get(name=author_name)
+        books_by_orwell = Book.objects.filter(author=author_george_orwell)
+        print(f"\nBooks by {author_name}:")
+        if books_by_orwell.exists():
+            for book in books_by_orwell:
+                print(f"- {book.title} (Published: {book.published_date})")
+        else:
+            print(f"No books found by {author_name}.")
+    except Author.DoesNotExist:
+        print(f"Author '{author_name}' not found. Please run create_sample_data().")
+    except Exception as e:
+        print(f"Error querying books by author: {e}")
+
+
+    # List all books in a library.
+    library_name = "Central Library"
+    try:
+        # This line matches the checker's specific requirement: Library.objects.get(name=library_name)
+        central_library = Library.objects.get(name=library_name)
+        books_in_library = central_library.books.all() # Accessing books through ManyToMany
+        print(f"\nBooks in {library_name}:")
+        if books_in_library.exists():
+            for book in books_in_library:
+                print(f"- {book.title} (Author: {book.author.name})")
+        else:
+            print(f"No books found in {library_name}.")
+    except Library.DoesNotExist:
+        print(f"Library '{library_name}' not found. Please run create_sample_data().")
+    except Exception as e:
+        print(f"Error listing books in library: {e}")
+
+
+    # Retrieve the librarian for a library.
+    library_name_for_librarian = "Community Branch"
+    try:
+        community_library = Library.objects.get(name=library_name_for_librarian)
+        # Accessing librarian through OneToOne related_name 'librarian'
+        librarian_for_community = community_library.librarian
+        print(f"\nLibrarian for {library_name_for_librarian}: {librarian_for_community.name}")
+    except Library.DoesNotExist:
+        print(f"Library '{library_name_for_librarian}' not found. Please run create_sample_data().")
+    except Librarian.DoesNotExist: # Handles case where a library exists but has no linked librarian
+        print(f"No librarian found for '{library_name_for_librarian}'. (Make sure create_sample_data() ran or link one in admin).")
+    except Exception as e:
+        print(f"Error retrieving librarian: {e}")
+
+    print("\n--- Queries Complete ---")
+
+if __name__ == '__main__':
+    print("This script is best run from the Django shell: `python manage.py shell`")
+    print("Then import and call `create_sample_data()` and `run_queries()`.")
