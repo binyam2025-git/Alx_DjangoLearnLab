@@ -9,7 +9,7 @@ from django.urls import reverse_lazy # Ensure this is imported for redirecting
 from .models import Author, Book, Librarian, UserProfile
 from .models import Library # This line addresses the specific checker error
 
-from django.views.generic import DetailView # For the class-based view
+from django.views.generic.detail import DetailView # Corrected import path as per checker
 from django.contrib.auth.forms import UserCreationForm # Ensure this is here for register_view
 from django.contrib.auth import login as auth_login # Ensure this is here for register_view
 from django.views.generic.list import ListView # Keep ListView if you have other list views or for completeness

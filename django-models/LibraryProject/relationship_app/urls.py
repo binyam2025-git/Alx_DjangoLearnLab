@@ -13,17 +13,15 @@ urlpatterns = [
 
     # Libraries
     path('libraries/', views.library_list_view, name='library_list'),
-    # --- IMPORTANT CHANGE HERE FOR CHECKER ---
-    # This links the class-based view correctly
+    # --- Corrected URL for Class-Based LibraryDetailView ---
     path('libraries/<int:pk>/', views.LibraryDetailView.as_view(), name='library_detail'),
 
     # Librarians
     path('librarians/<int:pk>/', views.librarian_detail_view, name='librarian_detail'),
 
     # Books (List)
-    # --- IMPORTANT CHANGE HERE FOR CHECKER ---
-    # This links to the correct function-based view 'list_books_view'
-    path('books/', views.list_books_view, name='list_books'),
+    # --- Corrected URL for Function-Based list_books_view ---
+    path('books/', views.list_books_view, name='list_books'), # Ensure this points to 'list_books_view'
 
     # Authentication Paths
     path('login/', auth_views.LoginView.as_view(template_name='relationship_app/login.html'), name='login'),
