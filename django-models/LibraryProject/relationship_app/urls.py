@@ -1,13 +1,14 @@
+# relationship_app/urls.py
 from django.urls import path
-from . import views # Import views from the current app
+from . import views
 
-app_name = 'relationship_app' # Namespace for URLs, good practice
+app_name = 'relationship_app' # Important for namespacing
 
 urlpatterns = [
-    # URL for the function-based view (lists all books)
-    path('books/', views.book_list, name='book_list'),
-
-    # URL for the class-based view (library detail)
-    # <int:pk> captures the primary key (ID) of the library from the URL
+    path('authors/', views.author_list_view, name='author_list'),
+    path('authors/<int:pk>/', views.AuthorDetailView.as_view(), name='author_detail'),
+    path('libraries/', views.library_list_view, name='library_list'),
     path('libraries/<int:pk>/', views.LibraryDetailView.as_view(), name='library_detail'),
+    path('librarians/<int:pk>/', views.librarian_detail_view, name='librarian_detail'),
+    path('books/', views.book_list_view, name='book_list'), # This is the new book list view
 ]

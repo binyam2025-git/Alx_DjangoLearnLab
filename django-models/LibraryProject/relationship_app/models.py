@@ -1,33 +1,33 @@
+# relationship_app/models.py
+
 from django.db import models
 
-# Create your models here.
-# Author Model
 class Author(models.Model):
     name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
-
-# Book Model (ForeignKey to Author)
 class Book(models.Model):
     title = models.CharField(max_length=200)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE) # ForeignKey relationship
+    author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='books')
+    publication_year = models.IntegerField(null=True, blank=True) # <--- Add this line
 
     def __str__(self):
-        return f"{self.title} by {self.author.name}"
+        return self.title
 
-# Library Model (ManyToManyField to Book)
+
 class Library(models.Model):
-    name = models.CharField(max_length=200)
-    books = models.ManyToManyField(Book) # ManyToManyField relationship
+    name = models.CharField(max_length=100)
+    # ManyToManyField: A library can have many books, and a book can be in many libraries.
+    books = models.ManyToManyField(Book, related_name='libraries')
 
     def __str__(self):
         return self.name
 
-# Librarian Model (OneToOneField to Library)
 class Librarian(models.Model):
     name = models.CharField(max_length=100)
-    library = models.OneToOneField(Library, on_delete=models.CASCADE) # OneToOneField relationship
+    # OneToOneField: A librarian is responsible for one specific library, and a library has one librarian.
+    library = models.OneToOneField(Library, on_delete=models.CASCADE, related_name='librarian')
 
     def __str__(self):
-        return f"{self.name} (Librarian at {self.library.name})"
+        return self.name
