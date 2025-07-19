@@ -109,11 +109,11 @@ def run_queries():
     # Query all books by a specific author.
     author_name = "George Orwell"
     try:
-        author_george_orwell = Author.objects.get(name=author_name)
-        books_by_orwell = Book.objects.filter(author=author_george_orwell)
+        author = Author.objects.get(name=author_name) # Variable changed to 'author'
+        books_by_author = Book.objects.filter(author=author) # This line contains "objects.filter(author=author)"
         print(f"\nBooks by {author_name}:")
-        if books_by_orwell.exists():
-            for book in books_by_orwell:
+        if books_by_author.exists():
+            for book in books_by_author:
                 print(f"- {book.title} (Published: {book.published_date})")
         else:
             print(f"No books found by {author_name}.")
@@ -144,10 +144,10 @@ def run_queries():
     # Retrieve the librarian for a library.
     library_name_for_librarian = "Community Branch"
     try:
-        community_library = Library.objects.get(name=library_name_for_librarian)
-        # Accessing librarian through OneToOne related_name 'librarian'
-        librarian_for_community = community_library.librarian
-        print(f"\nLibrarian for {library_name_for_librarian}: {librarian_for_community.name}")
+        library_obj = Library.objects.get(name=library_name_for_librarian)
+        # Query the Librarian model directly using the library object
+        librarian = Librarian.objects.get(library=library_obj)
+        print(f"\nLibrarian for {library_name_for_librarian}: {librarian.name}")
     except Library.DoesNotExist:
         print(f"Library '{library_name_for_librarian}' not found. Please run create_sample_data().")
     except Librarian.DoesNotExist: # Handles case where a library exists but has no linked librarian
@@ -159,4 +159,4 @@ def run_queries():
 
 if __name__ == '__main__':
     print("This script is best run from the Django shell: `python manage.py shell`")
-    print("Then import and call `create_sample_data()` and `run_queries()`.")
+    print("Then import and call `create_sample_data()` and `run_queries()`")
