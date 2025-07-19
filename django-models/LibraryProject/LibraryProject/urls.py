@@ -1,12 +1,15 @@
 # LibraryProject/LibraryProject/urls.py
-# This is the MAIN project-level URL configuration
 
 from django.contrib import admin
-from django.urls import path, include # <--- Make sure 'include' is here
+from django.urls import path, include
+from django.views.generic import TemplateView # Keep this if you have a home.html
 
 urlpatterns = [
-    path('admin/', admin.site.urls), # Standard Django admin URL
-    path('relationship_app/', include('relationship_app.urls')), # <--- THIS IS THE CRUCIAL LINE for your app
-    # If you have a 'bookshelf' app and its urls.py, you would also include it here, e.g.:
-    # path('bookshelf/', include('bookshelf.urls')),
+    path('admin/', admin.site.urls),
+    path('accounts/', include('accounts.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('bookshelf/', include('bookshelf.urls')),
+    path('relationships/', include('practice_relationships.urls')),
+    path('relationships_app/', include('relationship_app.urls')),
+    path('', TemplateView.as_view(template_name='home.html'), name='home'), # Corrected line   
 ]
