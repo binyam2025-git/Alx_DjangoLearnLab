@@ -122,6 +122,13 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    BASE_DIR / 'static', # This tells Django to look in a 'static' folder at your project root
+]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles' # Location where collectstatic will put files (for production)
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
