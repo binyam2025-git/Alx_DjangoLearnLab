@@ -1,21 +1,13 @@
 # relationship_app/views.py
 
-from django.shortcuts import render, get_object_or_404
-# Import ListView and DetailView for generic class-based views
-from django.views.generic.list import ListView      # This is for list views, if you use them
-from django.views.generic.detail import DetailView # This is the exact import your checker wants
-# Import your models
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 from .models import Author, Book, Library, Librarian
-# relationship_app/views.py
-# ... existing imports ...
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login as auth_login # Rename login to avoid conflict with a variable
-from django.shortcuts import redirect # Already imported if using render, but good to be explicit for redirect
-
-# relationship_app/views.py
-
-# ... existing imports ...
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
+from django.urls import reverse_lazy
 
 # --- Function-Based View: List all Authors ---
 def author_list_view(request):
@@ -26,18 +18,10 @@ def author_list_view(request):
     return render(request, 'relationship_app/author_list.html', context)
 
 # --- Class-Based View: Author Detail ---
-# Inherits from DetailView for single object display
 class AuthorDetailView(DetailView):
-    model = Author # Specify the model this view will operate on
+    model = Author
     template_name = 'relationship_app/author_detail.html'
-    context_object_name = 'author' # Name of the variable in the template (e.g., {{ author.name }})
-
-    # If you need to pass related objects to the template, you can override get_context_data
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     # Example: context['books'] = self.object.books.all() # Assuming 'books' is a related_name
-    #     return context
-
+    context_object_name = 'author'
 
 # --- Function-Based View: List all Libraries ---
 def library_list_view(request):
@@ -48,18 +32,10 @@ def library_list_view(request):
     return render(request, 'relationship_app/library_list.html', context)
 
 # --- Class-Based View: Library Detail ---
-# Inherits from DetailView for single object display
 class LibraryDetailView(DetailView):
-    model = Library # Specify the model this view will operate on
+    model = Library
     template_name = 'relationship_app/library_detail.html'
-    context_object_name = 'library' # Name of the variable in the template (e.g., {{ library.name }})
-
-    # If you need to pass related objects to the template, you can override get_context_data
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     # Example: context['librarians'] = self.object.librarian_set.all()
-    #     return context
-
+    context_object_name = 'library'
 
 # --- Function-Based View: Librarian Detail ---
 def librarian_detail_view(request, pk):
@@ -69,14 +45,12 @@ def librarian_detail_view(request, pk):
     }
     return render(request, 'relationship_app/librarian_detail.html', context)
 
-
 # --- Function-Based View: List all Books ---
 def book_list_view(request):
     books = Book.objects.all().order_by('title')
     context = {
         'books': books
     }
-    # Ensure this template name matches your actual template file for listing books
     return render(request, 'relationship_app/list_books.html', context)
 
 # --- Function-Based View: User Registration ---
@@ -85,8 +59,8 @@ def register_view(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            auth_login(request, user) # Log the user in immediately after registration
-            return redirect('home') # Redirect to a home page after successful registration
+            auth_login(request, user)
+            return redirect('home')
     else:
         form = UserCreationForm()
     context = {'form': form}
@@ -104,17 +78,43 @@ def is_member(user):
 
 # --- Role-Based Views ---
 
-@login_required # Ensures user is logged in
-@user_passes_test(is_admin) # Ensures user has 'Admin' role
+@login_required
+@user_passes_test(is_admin)
 def admin_view(request):
     return render(request, 'relationship_app/admin_view.html')
 
-@login_required # Ensures user is logged in
-@user_passes_test(is_librarian) # Ensures user has 'Librarian' role
+@login_required
+@user_passes_test(is_librarian)
 def librarian_view(request):
     return render(request, 'relationship_app/librarian_view.html')
 
-@login_required # Ensures user is logged in
-@user_passes_test(is_member) # Ensures user has 'Member' role
+@login_required
+@user_passes_test(is_member)
 def member_view(request):
     return render(request, 'relationship_app/member_view.html')
+
+# --- Book Management Views with Custom Permissions ---
+@permission_required('relationship_app.can_add_book', raise_exception=True)
+def book_add_view(request):
+    # In a real application, you'd use a form here (e.g., BookForm)
+    if request.method == 'POST':
+        # Process form data, save book
+        return redirect('book_list') # Redirect to book list after adding
+    return render(request, 'relationship_app/book_add.html', {'message': 'Add Book Page'})
+
+@permission_required('relationship_app.can_change_book', raise_exception=True)
+def book_edit_view(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    # In a real application, you'd use a form here (e.g., BookForm with instance=book)
+    if request.method == 'POST':
+        # Process form data, update book
+        return redirect('book_detail', pk=book.pk) # Redirect to book detail after editing
+    return render(request, 'relationship_app/book_edit.html', {'book': book, 'message': f'Edit Book Page for {book.title}'})
+
+@permission_required('relationship_app.can_delete_book', raise_exception=True)
+def book_delete_view(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == 'POST':
+        book.delete()
+        return redirect('book_list') # Redirect to book list after deletion
+    return render(request, 'relationship_app/book_confirm_delete.html', {'book': book, 'message': f'Confirm Delete for {book.title}'})

@@ -21,17 +21,19 @@ urlpatterns = [
     # Books (List)
     path('books/', views.book_list_view, name='book_list'),
 
-    # Add other specific paths here if you have them,
-    # e.g., for book details, etc., as per your project requirements.
-    # ... your existing paths ...
-
     # Authentication Paths
     path('login/', auth_views.LoginView.as_view(template_name='relationship_app/login.html'), name='login'),
-    #path('logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'), # Redirects to home or login page
     path('logout/', auth_views.LogoutView.as_view(template_name='relationship_app/logout.html'), name='logout'),
     path('register/', views.register_view, name='register'),
+
     # Role-Based Access Control Paths
     path('admin-only/', views.admin_view, name='admin_view'),
     path('librarian-only/', views.librarian_view, name='librarian_view'),
     path('member-only/', views.member_view, name='member_view'),
+
+    # --- Book Management with Custom Permissions ---
+    # These paths link to the new views that enforce permissions
+    path('books/add/', views.book_add_view, name='book_add'),
+    path('books/<int:pk>/edit/', views.book_edit_view, name='book_edit'),
+    path('books/<int:pk>/delete/', views.book_delete_view, name='book_delete'),
 ]
