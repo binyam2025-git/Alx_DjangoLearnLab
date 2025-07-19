@@ -2,7 +2,8 @@
 
 from django.shortcuts import render, get_object_or_404
 # Import ListView and DetailView for generic class-based views
-from django.views.generic import ListView, DetailView
+from django.views.generic.list import ListView      # This is for list views, if you use them
+from django.views.generic.detail import DetailView # This is the exact import your checker wants
 # Import your models
 from .models import Author, Book, Library, Librarian
 

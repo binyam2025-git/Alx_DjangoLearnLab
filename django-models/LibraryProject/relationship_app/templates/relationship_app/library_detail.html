@@ -1,2 +1,20 @@
-<h1>Library Detail Page</h1>
-<p>This page will show details for a specific library.</p>
+<h1>Library: {{ library.name }}</h1>
+<p>Location: {{ library.address }}</p>
+<h2>Books in this Library:</h2>
+<ul>
+    {% for book in library.book_set.all %} {# Assumes default related name 'book_set' from Book model to Library, or your custom 'books' if defined #}
+        <li>{{ book.title }} by {{ book.author.name }}</li>
+    {% empty %}
+        <li>No books in this library.</li>
+    {% endfor %}
+</ul>
+<h2>Librarians:</h2>
+<ul>
+    {% for librarian in library.librarian_set.all %} {# Assumes default related name 'librarian_set' from Librarian model to Library #}
+        <li>{{ librarian.name }} (ID: {{ librarian.employee_id }})</li>
+    {% empty %}
+        <li>No librarians assigned to this library.</li>
+    {% endfor %}
+</ul>
+<p><a href="{% url 'relationship_app:library_list' %}">Back to Libraries</a></p>
+<p><a href="{% url 'home' %}">Back to Home</a></p>
