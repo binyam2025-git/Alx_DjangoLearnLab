@@ -6,7 +6,11 @@ from django.views.generic.list import ListView      # This is for list views, if
 from django.views.generic.detail import DetailView # This is the exact import your checker wants
 # Import your models
 from .models import Author, Book, Library, Librarian
-
+# relationship_app/views.py
+# ... existing imports ...
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login as auth_login # Rename login to avoid conflict with a variable
+from django.shortcuts import redirect # Already imported if using render, but good to be explicit for redirect
 
 # --- Function-Based View: List all Authors ---
 def author_list_view(request):
@@ -69,3 +73,16 @@ def book_list_view(request):
     }
     # Ensure this template name matches your actual template file for listing books
     return render(request, 'relationship_app/list_books.html', context)
+
+# --- Function-Based View: User Registration ---
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            auth_login(request, user) # Log the user in immediately after registration
+            return redirect('home') # Redirect to a home page after successful registration
+    else:
+        form = UserCreationForm()
+    context = {'form': form}
+    return render(request, 'relationship_app/register.html', context)

@@ -127,3 +127,12 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# LibraryProject/settings.py
+
+# ... existing settings ...
+
+# Authentication Redirect URLs
+LOGIN_REDIRECT_URL = '/' # Redirect to home page after login
+LOGOUT_REDIRECT_URL = '/relationships_app/login/' # Redirect to login page after logout (or '/')
+LOGIN_URL = '/relationships_app/login/' # URL where unauthenticated users are redirected for login
+

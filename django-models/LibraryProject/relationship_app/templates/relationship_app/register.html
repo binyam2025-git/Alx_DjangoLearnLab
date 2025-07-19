@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        form { margin-top: 20px; padding: 20px; border: 1px solid #ccc; border-radius: 5px; max-width: 400px; }
+        form p { margin-bottom: 15px; }
+        form label { display: block; margin-bottom: 5px; font-weight: bold; }
+        form input[type="text"], form input[type="password"], form input[type="email"] {
+            width: calc(100% - 10px); padding: 8px; border: 1px solid #ddd; border-radius: 3px;
+        }
+        form button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        form button:hover { background-color: #0056b3; }
+        .errorlist { color: red; list-style-type: none; padding: 0; margin: 0; }
+        ul.errorlist li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Register</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Register</button>
+    </form>
+</body>
+</html>
