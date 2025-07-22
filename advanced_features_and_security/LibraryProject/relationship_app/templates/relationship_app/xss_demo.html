@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head><title>XSS Demo</title></head>
+<body>
+    <h1>XSS Demonstration</h1>
+    <p>Your input (escaped by Django):</p>
+    <div>{{ user_input }}</div> {# Django escapes this by default #}
+    <hr>
+    <p>Try appending `?q=<script>alert('XSS!');</script>` to the URL.</p>
+</body>
+</html>

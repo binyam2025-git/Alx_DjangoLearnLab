@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unsafe Form</title>
+</head>
+<body>
+    <h1>Unsafe Form (NO CSRF protection)</h1>
+    <p style="color: red;">DANGER: This form lacks {% csrf_token %} for demonstration purposes!</p>
+    <p>{{ message }}</p>
+    <form method="post">
+        <input type="text" name="data" placeholder="Enter data">
+        <button type="submit">Submit Unsafe Form</button>
+    </form>
+    <p><a href="{% url 'bookshelf:my_form' %}">Go to Safe Form</a></p>
+</body>
+</html>

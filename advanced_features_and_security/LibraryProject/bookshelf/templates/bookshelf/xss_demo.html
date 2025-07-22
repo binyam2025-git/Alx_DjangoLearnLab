@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XSS Demo</title>
+</head>
+<body>
+    <h1>XSS Protection Demonstration</h1>
+    <p>User-provided content (should be escaped):</p>
+    <div>
+        {{ user_content }} </div>
+
+    <p>If you see an alert box, XSS protection failed. If you see the raw script tag, it worked!</p>
+
+    <h2>Disabling autoescape (DO NOT DO THIS IN PRODUCTION unless you're very careful!):</h2>
+    {% autoescape off %}
+        <p>Unsafe content (will execute script if present):</p>
+        <div>
+            {{ user_content }}
+        </div>
+    {% endautoescape %}
+</body>
+</html>
