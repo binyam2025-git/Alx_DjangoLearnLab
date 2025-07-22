@@ -10,21 +10,21 @@ from django.views.generic import DetailView, ListView
 from django.conf import settings # Add this import for settings.AUTH_USER_MODEL (if needed)
 
 # Import your models, explicitly CustomUser now
-from .models import Author, Book, Librarian, Library, CustomUser # Ensure CustomUser is imported
+from .models import Author, Book, Librarian, Library  #CustomUser # Ensure CustomUser is imported
 
 # Optional: If you use a custom form for registration, define it here or import it.
 # from .forms import CustomUserCreationForm # Example if you create a forms.py
 
 # --- Helper functions for role checks (UPDATE THESE) ---
 def is_admin(user):
-    # Now role is directly on CustomUser
-    return user.is_authenticated and hasattr(user, 'role') and user.role == 'Admin'
+    # For now, just check if user is superuser or staff
+    return user.is_authenticated and user.is_superuser # or user.is_staff
 
 def is_librarian(user):
-    return user.is_authenticated and hasattr(user, 'role') and user.role == 'Librarian'
+    return user.is_authenticated and user.is_staff and not user.is_superuser # Example: staff but not superuser
 
 def is_member(user):
-    return user.is_authenticated and hasattr(user, 'role') and user.role == 'Member'
+    return user.is_authenticated and not user.is_staff and not user.is_superuser # Example: regular user
 
 # --- Your existing views (UPDATE WHERE USER.USERPROFILE WAS USED) ---
 
@@ -40,7 +40,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save(commit=False)
             # Set default role here
-            user.role = 'Member' # Default role for new registrations
+            #user.role = 'Member' # Default role for new registrations
             user.save()
 
             # If you need to set date_of_birth or profile_photo during registration,

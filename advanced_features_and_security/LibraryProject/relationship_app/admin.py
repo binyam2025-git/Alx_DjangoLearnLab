@@ -1,8 +1,8 @@
 # C:\Users\user\Alx_DjangoLearnLab\advanced_features_and_security\LibraryProject\relationship_app\admin.py
 
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Author, Book, Library, Librarian # Import your models
+#from django.contrib.auth.admin import UserAdmin
+from .models import Author, Book, Library, Librarian # Import your models
 
 class CustomUserAdmin(UserAdmin):
     # Add date_of_birth and profile_photo to the fieldsets
