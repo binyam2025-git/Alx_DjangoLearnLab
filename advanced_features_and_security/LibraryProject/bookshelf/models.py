@@ -41,3 +41,15 @@ class CustomUser(AbstractUser):
         return self.email
 
 # (Leave this file focused on CustomUser for now. Other models like Book, Author, etc. should remain in relationship_app/models.py)
+
+class Book(models.Model):
+    # ... your fields ...
+    class Meta:
+        permissions = [
+            ("can_view", "Can view book data"),
+            ("can_create", "Can create new books"), # <--- CHECK THIS EXACTLY
+            ("can_edit", "Can edit existing books"),
+            ("can_delete", "Can delete books"),     # <--- CHECK THIS EXACTLY
+        ]
+        # ... other Meta options ...
+    # ... __str__ method ...
