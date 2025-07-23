@@ -1,59 +1,52 @@
-# LibraryProject/bookshelf/views.py
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt # Temporarily for demonstration only!
-from .forms import BookForm # This import will be needed in Phase 2
+# C:\Users\user\Alx_DjangoLearnLab\advanced_features_and_security\LibraryProject\bookshelf\views.py
 
-# ... (Keep any existing views you have here, e.g., for restricted-add-book) ...
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse # Keep HttpResponse if used in add_book_success
+from django.contrib.auth.decorators import login_required, permission_required
+from bookshelf.models import Book, Author, Library # All related models are here now
+from relationship_app.forms import BookForm # BookForm is still in relationship_app
 
-# --- VIEWS FOR CSRF AND XSS DEMONSTRATION ---
 
-def my_form_view(request):
-    """
-    A simple form demonstrating Django's built-in CSRF protection.
-    """
-    message = ""
-    if request.method == 'POST':
-        message = "Form submitted successfully with CSRF protection!"
-    else:
-        message = "Please submit the form (CSRF protected)."
-    return render(request, 'bookshelf/my_form.html', {'message': message})
+@login_required
+@permission_required('bookshelf.can_view', raise_exception=True)
+def book_list(request): # RENAMED from list_books
+    books = Book.objects.all()
+    return render(request, 'relationship_app/book_list.html', {'books': books}) # Template path remains the same for now
 
-@csrf_exempt # WARNING: ONLY for demonstrating lack of CSRF protection. Do NOT use in production!
-def my_form_view_unsafe(request):
-    """
-    A simple form demonstrating a lack of CSRF protection (due to @csrf_exempt).
-    """
-    message = ""
-    if request.method == 'POST':
-        message = "Unsafe form submitted (CSRF bypassed)!"
-    else:
-        message = "Please submit the unsafe form (NO CSRF protection)."
-    return render(request, 'bookshelf/my_form_unsafe.html', {'message': message})
-
-def xss_demo_view(request):
-    """
-    A view to demonstrate Django's XSS protection (auto-escaping).
-    """
-    # This string contains malicious script that Django should escape
-    user_input_with_script = "<script>alert('You have been XSSed!');</script><h1>Malicious Content!</h1>"
-    return render(request, 'bookshelf/xss_demo.html', {'user_content': user_input_with_script})
-
-# --- VIEW FOR INPUT VALIDATION (Phase 2) ---
-
-def book_create_view(request):
-    """
-    A view for creating a Book demonstrating input validation.
-    """
-    message = ""
+@login_required
+@permission_required('bookshelf.can_create', raise_exception=True)
+def book_add_view(request):
     if request.method == 'POST':
         form = BookForm(request.POST)
         if form.is_valid():
             form.save()
-            message = "Book added successfully with validation!"
-            # Consider redirecting here in a real app
-        else:
-            message = "Validation errors occurred. Please correct the form."
+            return redirect('book_list') # Redirect to the new name
     else:
         form = BookForm()
-        message = "Fill out the form to add a book (with validation)."
-    return render(request, 'bookshelf/book_form.html', {'form': form, 'message': message})
+    return render(request, 'relationship_app/book_form.html', {'form': form, 'action': 'Add'})
+
+# This view is purely for redirect success, doesn't need permissions
+def add_book_success(request):
+    return HttpResponse("Book added successfully!")
+
+@login_required
+@permission_required('bookshelf.can_edit', raise_exception=True)
+def book_edit_view(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == 'POST':
+        form = BookForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
+            return redirect('book_list') # Redirect to the new name
+    else:
+        form = BookForm(instance=book)
+    return render(request, 'relationship_app/book_form.html', {'form': form, 'action': 'Edit'})
+
+@login_required
+@permission_required('bookshelf.can_delete', raise_exception=True)
+def book_delete_view(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if request.method == 'POST':
+        book.delete()
+        return redirect('book_list') # Redirect to the new name
+    return render(request, 'relationship_app/book_confirm_delete.html', {'book': book})
