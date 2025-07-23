@@ -174,3 +174,41 @@ CSP_FORM_ACTION = ("'self'",) # Restrict which URLs can be used as the action fo
 # CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
 
 # End of CSP Settings
+
+# ==============================================================================
+# HTTPS and Security Settings (Step 1, 2, 3)
+# ==============================================================================
+# Step 1: Configure Django for HTTPS Support
+# SECURE_SSL_REDIRECT: Redirects all non-HTTPS requests to HTTPS.
+# IMPORTANT: Only set to True in production after your web server is configured for HTTPS.
+# In development (DEBUG=True), setting this to True will cause redirect loops if your dev server isn't HTTPS.
+SECURE_SSL_REDIRECT = not DEBUG # Set to True for production, False for development
+# SECURE_HSTS_SECONDS: Instructs browsers to only access the site via HTTPS for a specified time (in seconds).
+# 31536000 seconds = 1 year. This prevents downgrade attacks.
+# Only enable in production after ensuring HTTPS is fully functional, as it's hard to revert.
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0 # Set to 0 or comment out in development
+# SECURE_HSTS_INCLUDE_SUBDOMAINS: Include all subdomains in the HSTS policy.
+# Requires all subdomains to also be HTTPS.
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True if not DEBUG else False
+# SECURE_HSTS_PRELOAD: Allows browser vendors to include your site in a preload list for HSTS.
+# Requires SECURE_HSTS_SECONDS and SECURE_HSTS_INCLUDE_SUBDOMAINS to be set.
+# Only enable after submitting your domain to the HSTS preload list.
+SECURE_HSTS_PRELOAD = True if not DEBUG else False
+
+# Step 2: Enforce Secure Cookies
+# SESSION_COOKIE_SECURE: Ensures session cookies are only transmitted over HTTPS.
+SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE: Ensures CSRF cookies are only transmitted over HTTPS.
+CSRF_COOKIE_SECURE = True
+
+# Step 3: Implement Secure Headers
+# X_FRAME_OPTIONS: Prevents your site from being embedded in iframes, protecting against clickjacking.
+X_FRAME_OPTIONS = 'DENY'
+# SECURE_CONTENT_TYPE_NOSNIFF: Prevents browsers from MIME-sniffing a response away from the declared content-type.
+# Helps prevent XSS attacks.
+SECURE_CONTENT_TYPE_NOSNIFF = True
+# SECURE_BROWSER_XSS_FILTER: Enables the browser’s built-in XSS filtering. (Deprecated in newer Django/browsers but still a good practice)
+SECURE_BROWSER_XSS_FILTER = True
+# ==============================================================================
+# End HTTPS and Security Settings
+# ==============================================================================
