@@ -1,11 +1,20 @@
-<h1>Books</h1>
-<a href="{% url 'add_book' %}">Add New Book</a>
-<ul>
-    {% for book in books %}
-    <li>
-        {{ book.title }} by {{ book.author.name }} in {{ book.library.name }}
-        <a href="{% url 'book_edit' book.pk %}">Edit</a>
-        <a href="{% url 'book_delete' book.pk %}">Delete</a>
-    </li>
-    {% endfor %}
-</ul>
+{# C:\Users\user\Alx_DjangoLearnLab\advanced_features_and_security\LibraryProject\bookshelf\templates\bookshelf\book_list.html #}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book List</title>
+</head>
+<body>
+    <h1>Our Books</h1>
+    <ul>
+        {% for book in books %}
+            <li>{{ book.title }} by {{ book.author.name }}</li>
+        {% empty %}
+            <li>No books found.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
