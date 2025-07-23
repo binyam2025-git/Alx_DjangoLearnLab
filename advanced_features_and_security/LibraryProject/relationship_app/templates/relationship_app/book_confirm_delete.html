@@ -1,7 +1,7 @@
 <h1>Confirm Delete</h1>
 <p>Are you sure you want to delete "{{ book.title }}"?</p>
 <form method="post">
-    {% csrf_token %}
+    {% csrf_token %} {# <-- ENSURE THIS IS PRESENT #}
     <button type="submit">Yes, delete</button>
-    <a href="{% url 'list_books' %}">Cancel</a>
+    <a href="{% url 'book_list' %}">Cancel</a>
 </form>

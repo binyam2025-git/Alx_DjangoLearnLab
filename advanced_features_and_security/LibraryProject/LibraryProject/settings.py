@@ -1,5 +1,5 @@
 # settings.py
-import os # <-- Ensure this line is present at the top
+import os
 from pathlib import Path
 
 """
@@ -27,9 +27,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(1v^tkjw7poj*)w88xz33c+_v#p#ooav+g%5^(5it5z62f-ll('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True  # Old setting
+# Set to False for production!
+DEBUG = False 
 
-ALLOWED_HOSTS = []
+# When DEBUG is False, you must configure ALLOWED_HOSTS.
+# For local testing, '127.0.0.1' and 'localhost' are sufficient.
+# For deployment, you'd add your domain names.
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] # Add your production domain names here later
 
 
 # Application definition
@@ -43,20 +48,22 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bookshelf',
     'relationship_app',
-    'practice_relationships', # <--- ADD THIS LINE HERE
+    'practice_relationships',
     'accounts',
+    'csp', # Add this for Content Security Policy
 ]
 
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware', # Add this line for Content Security Policy, ideally after SecurityMiddleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', # This is for X_FRAME_OPTIONS, can be kept
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
@@ -140,8 +147,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ... (other settings above) ...
 
 STATIC_URL = 'static/'
-LOGIN_REDIRECT_URL = "/accounts/profile/"  # <-- ADD THIS LINE
-LOGOUT_REDIRECT_URL = "/accounts/profile/" # <-- ADD THIS LINE
+LOGIN_REDIRECT_URL = "/accounts/profile/"
+LOGOUT_REDIRECT_URL = "/accounts/profile/"
 
 # This is crucial for Django to find static files in your apps and custom directories
 STATICFILES_DIRS = [
@@ -171,3 +178,40 @@ EMAIL_HOST = 'localhost'
 EMAIL_PORT = 1025
 DEFAULT_FROM_EMAIL = 'webmaster@yourdomain.com'
 SERVER_EMAIL = 'webmaster@yourdomain.com'
+
+# XSS, Clickjacking, and MIME-sniffing protections
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY' # Prevents clickjacking by forbidding embedding in iframes
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Enforce that cookies are only sent over HTTPS.
+# For local development without HTTPS, setting these to True will prevent your application from working
+# because your browser won't send the cookies.
+# For the deliverable, set them to True.
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# Recommended for production over HTTPS
+SECURE_SSL_REDIRECT = True
+SECURE_HSTS_SECONDS = 31536000 # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+# Content Security Policy (CSP)
+# A strict policy as a starting point. Adjust as needed for your project's assets.
+CSP_DEFAULT_SRC = ("'self'",) # Allow content from same origin
+CSP_SCRIPT_SRC = ("'self'",) # Allow scripts from same origin
+CSP_STYLE_SRC = ("'self'",) # Allow stylesheets from same origin
+CSP_IMG_SRC = ("'self'",) # Allow images from same origin
+CSP_FONT_SRC = ("'self'",) # Allow fonts from same origin
+CSP_CONNECT_SRC = ("'self'",) # Allow connections (XHR, WebSockets) from same origin
+CSP_BASE_URI = ("'self'",) # Disallows any <base> tag that doesn't match the current origin
+CSP_OBJECT_SRC = ("'none'",) # Disallow plugins like <object>, <embed>, or <applet>
+CSP_FRAME_ANCESTORS = ("'self'",) # Controls embedding of your site in iframes
+CSP_FORM_ACTION = ("'self'",) # Restricts which URLs can be used as the action for HTML form submissions
+CSP_REPORT_URI = None # Optional: URL to send CSP violation reports (e.g., to Sentry)
+# CSP_REPORT_ONLY = DEBUG # Set to True in development to log violations without blocking
+
+# Example for external CDN resources (uncomment and adjust if needed):
+# CSP_SCRIPT_SRC = ("'self'", "https://cdn.jsdelivr.net", "https://code.jquery.com")
+# CSP_STYLE_SRC = ("'self'", "https://cdn.jsdelivr.net")
