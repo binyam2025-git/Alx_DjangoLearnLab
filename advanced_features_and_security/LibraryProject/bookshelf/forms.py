@@ -23,5 +23,6 @@ class BookForm(forms.ModelForm):
 # For instance, if you still need an 'ExampleForm' as a generic demonstration, keep it.
 # Otherwise, remove it if it's not being used.
 class ExampleForm(forms.Form):
-    your_name = forms.CharField(label="Your name", max_length=100)
-    message = forms.CharField(label="Your message", widget=forms.Textarea)
+    name = forms.CharField(label='Your Name', max_length=100)
+    email = forms.EmailField(label='Your Email')
+    message = forms.CharField(label='Your Message', widget=forms.Textarea)

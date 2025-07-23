@@ -5,7 +5,8 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, permission_required
 
 # Import the BookForm from the SAME app (bookshelf)
-from .forms import BookForm, ExampleForm # Corrected: BookForm and ExampleForm are in this app's forms.py
+from .forms import BookForm # Corrected: BookForm and ExampleForm are in this app's forms.py
+from .forms import ExampleForm 
 
 # Import models from their definitive location: relationship_app
 from relationship_app.models import Book, Author, Library
