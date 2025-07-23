@@ -19,6 +19,7 @@ class BookForm(forms.ModelForm):
         model = Book
         # Ensure 'author' and 'library' are fields if they are FKs in your Book model.
         # Adjust fields based on your actual Book model definition.
+        # This 'library' field should now exist in relationship_app.models.Book
         fields = ['title', 'author', 'library']
         # You might want to add widgets for better UI
         widgets = {

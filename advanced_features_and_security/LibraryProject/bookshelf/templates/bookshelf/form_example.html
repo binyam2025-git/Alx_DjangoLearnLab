@@ -1,0 +1,46 @@
+{# C:\Users\user\Alx_DjangoLearnLab\advanced_features_and_security\LibraryProject\bookshelf\templates\bookshelf\form_example.html #}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example Form - Security Demo</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
+        form { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        textarea { width: 90%; max-width: 600px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+        button:hover { background-color: #0056b3; }
+        .output { margin-top: 20px; padding: 15px; border: 1px solid #0056b3; border-radius: 5px; background-color: #e6f0ff; }
+        pre { white-space: pre-wrap; word-wrap: break-word; background-color: #f0f8ff; padding: 10px; border-radius: 4px; border: 1px dashed #a8d0ff; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>Example Form for Security Testing</h1>
+    <p>This form demonstrates how user input is handled securely to prevent Cross-Site Scripting (XSS) vulnerabilities.</p>
+    <p><strong>Try entering:</strong> <code>&lt;script&gt;alert('XSS Attack!');&lt;/script&gt;</code> into the text area below and submit.</p>
+    <p>Observe the browser's behavior and the output below. The script should be displayed as plain text, not executed.</p>
+
+    <form method="post">
+        {% csrf_token %} {# Essential for CSRF protection in all POST forms #}
+        {{ form.as_p }} {# Renders form fields wrapped in <p> tags #}
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if processed_input %}
+        <div class="output">
+            <h2>Processed Input (Securely Rendered):</h2>
+            {# Django templates automatically escape HTML by default using the 'escape' filter. #}
+            {# This means <script> tags are converted to &lt;script&gt; and won't execute. #}
+            <pre>{{ processed_input }}</pre> 
+            <p>If you entered a script, it should appear as plain text here, not execute. This demonstrates Django's built-in XSS protection for template rendering.</p>
+        </div>
+    {% endif %}
+
+    <p><a href="{% url 'home' %}">Back to Home</a></p>
+</body>
+</html>

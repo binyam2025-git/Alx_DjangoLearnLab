@@ -1,34 +1,27 @@
-# bookshelf/forms.py
-from django import forms
-from .models import Book # Assuming you have a Book model
+# C:\Users\user\Alx_DjangoLearnLab\advanced_features_and_security\LibraryProject\bookshelf\forms.py
 
+from django import forms
+# Correct import for Book: It should come from relationship_app.models
+# We import Author and Library as well, as BookForm needs to display choices for them.
+from relationship_app.models import Book, Author, Library
+
+
+# Form for creating/editing Book objects
 class BookForm(forms.ModelForm):
     class Meta:
         model = Book
-        fields = ['title', 'author', 'publication_year'] # Use fields from your Book model
+        # Ensure these fields exactly match the names in relationship_app/models.py Book model.
+        # This list correctly reflects the activated fields in your Book model.
+        fields = ['title', 'author', 'library', 'publication_date', 'genre', 'isbn', 'is_available']
 
-    # Custom validation for 'title'
-    def clean_title(self):
-        title = self.cleaned_data.get('title')
-        if len(title) < 3:
-            raise forms.ValidationError("Title must be at least 3 characters long.")
-        if "badword" in title.lower(): # Simple example, you'd use a more robust check
-            raise forms.ValidationError("Titles cannot contain 'badword'.")
-        return title
+        # Optional: Add widgets for better control over form fields (e.g., DateInput for dates)
+        widgets = {
+            'publication_date': forms.DateInput(attrs={'type': 'date'}),
+        }
 
-    # Custom validation for 'publication_year'
-    def clean_publication_year(self):
-        year = self.cleaned_data.get('publication_year')
-        # Using 2025 as the max year, based on your system time
-        if not (1000 <= year <= 2025):
-            raise forms.ValidationError("Publication year must be between 1000 and 2025.")
-        return year
-
-    # General clean method for multiple fields
-    def clean(self):
-        cleaned_data = super().clean()
-        title = cleaned_data.get('title')
-        author = cleaned_data.get('author')
-        if title and author and title.lower() == author.lower():
-            self.add_error(None, "Title and author cannot be the same.") # Non-field error
-        return cleaned_data
+# If you have other forms in the bookshelf app, add them here.
+# For instance, if you still need an 'ExampleForm' as a generic demonstration, keep it.
+# Otherwise, remove it if it's not being used.
+class ExampleForm(forms.Form):
+    your_name = forms.CharField(label="Your name", max_length=100)
+    message = forms.CharField(label="Your message", widget=forms.Textarea)

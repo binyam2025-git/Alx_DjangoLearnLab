@@ -1,4 +1,5 @@
-# settings.py
+# C:\Users\user\Alx_DjangoLearnLab\advanced_features_and_security\LibraryProject\LibraryProject\settings.py
+
 import os
 from pathlib import Path
 
@@ -14,8 +15,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,17 +23,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(1v^tkjw7poj*)w88xz33c+_v#p#ooav+g%5^(5it5z62f-ll('
+SECRET_KEY = 'django-insecure-(1v^tkjw7poj*)w88xz33c+_v#p#ooav+g%5^(5it5z62f-ll(' # Keep your generated key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True  # Old setting
-# Set to False for production!
-DEBUG = False 
+# Set DEBUG to True for development/debugging, False for production.
+DEBUG = True # Set to True for development ease
 
 # When DEBUG is False, you must configure ALLOWED_HOSTS.
 # For local testing, '127.0.0.1' and 'localhost' are sufficient.
 # For deployment, you'd add your domain names.
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] # Add your production domain names here later
+ALLOWED_HOSTS = ['127.00.1', 'localhost'] # Corrected: '127.0.0.1'
 
 
 # Application definition
@@ -46,14 +44,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Your custom user app should be listed here, typically before other apps
+    # that might depend on it, and before django.contrib.admin if you plan
+    # to customize admin for CustomUser.
+    'accounts', # Using 'accounts' as confirmed by your previous settings
     'bookshelf',
     'relationship_app',
     'practice_relationships',
-    'accounts',
-    'csp', # Add this for Content Security Policy
+    'csp', # For Content Security Policy
 ]
 
-AUTH_USER_MODEL = 'bookshelf.CustomUser'
+# Configure your custom user model
+AUTH_USER_MODEL = 'accounts.CustomUser' # Points to CustomUser in your 'accounts' app
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -63,12 +66,10 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware', # This is for X_FRAME_OPTIONS, can be kept
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
-
-# LibraryProject/LibraryProject/settings.py
 
 TEMPLATES = [
     {
@@ -125,7 +126,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Africa/Addis_Ababa'
+TIME_ZONE = 'Africa/Addis_Ababa' # Confirmed this timezone previously
 
 USE_I18N = True
 
@@ -137,25 +138,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# LibraryProject/LibraryProject/settings.py
-
-# ... (other settings above) ...
-
-STATIC_URL = 'static/'
-LOGIN_REDIRECT_URL = "/accounts/profile/"
-LOGOUT_REDIRECT_URL = "/accounts/profile/"
-
 # This is crucial for Django to find static files in your apps and custom directories
 STATICFILES_DIRS = [
     # This first entry is common for project-wide static files (e.g., LibraryProject/static/)
     os.path.join(BASE_DIR, 'static'),
     # This entry tells Django to look for static files inside your 'practice_relationships' app's static directory
-    # specifically in 'LibraryProject/practice_relationships/static/'
     os.path.join(BASE_DIR, 'practice_relationships', 'static'),
 ]
 
@@ -164,54 +151,94 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# LibraryProject/LibraryProject/settings.py
 
-# ... (other settings above) ...
+# Login/Logout Redirect URLs
+LOGIN_REDIRECT_URL = "/accounts/profile/" # Assuming you'll have a profile view in accounts app
+LOGOUT_REDIRECT_URL = "/accounts/profile/" # Or '/' if you prefer to redirect to home
 
-# Email configuration for password reset (Development only)
+
+# Email configuration for password reset (Development only - prints to console)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 1025
 DEFAULT_FROM_EMAIL = 'webmaster@yourdomain.com'
 SERVER_EMAIL = 'webmaster@yourdomain.com'
 
-# XSS, Clickjacking, and MIME-sniffing protections
+
+# Security Headers (Adjusted for DEBUG=True development)
+# When DEBUG is True, you typically don't run over HTTPS, so
+# these secure flags should be False to prevent issues.
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY' # Prevents clickjacking by forbidding embedding in iframes
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# Enforce that cookies are only sent over HTTPS.
-# For local development without HTTPS, setting these to True will prevent your application from working
-# because your browser won't send the cookies.
-# For the deliverable, set them to True.
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = False    # Set to False for HTTP development
+SESSION_COOKIE_SECURE = False # Set to False for HTTP development
 
-# Recommended for production over HTTPS
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 31536000 # 1 year
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+SECURE_SSL_REDIRECT = False # Set to False for HTTP development
+SECURE_HSTS_SECONDS = 0 # Set to 0 or remove for development
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
 
-# Content Security Policy (CSP)
-# A strict policy as a starting point. Adjust as needed for your project's assets.
-CSP_DEFAULT_SRC = ("'self'",) # Allow content from same origin
-CSP_SCRIPT_SRC = ("'self'",) # Allow scripts from same origin
-CSP_STYLE_SRC = ("'self'",) # Allow stylesheets from same origin
-CSP_IMG_SRC = ("'self'",) # Allow images from same origin
-CSP_FONT_SRC = ("'self'",) # Allow fonts from same origin
-CSP_CONNECT_SRC = ("'self'",) # Allow connections (XHR, WebSockets) from same origin
-CSP_BASE_URI = ("'self'",) # Disallows any <base> tag that doesn't match the current origin
-CSP_OBJECT_SRC = ("'none'",) # Disallow plugins like <object>, <embed>, or <applet>
-CSP_FRAME_ANCESTORS = ("'self'",) # Controls embedding of your site in iframes
-CSP_FORM_ACTION = ("'self'",) # Restricts which URLs can be used as the action for HTML form submissions
-CSP_REPORT_URI = None # Optional: URL to send CSP violation reports (e.g., to Sentry)
-# CSP_REPORT_ONLY = DEBUG # Set to True in development to log violations without blocking
+# Content Security Policy (CSP) - Updated format for django-csp 4.0+
+# Ensure no old CSP_* variables (like CSP_DEFAULT_SRC, CSP_REPORT_ONLY = DEBUG)
+# are present anywhere else in this file, as they conflict with the new dictionary format.
+if DEBUG:
+    # In development, use report-only mode to log violations without blocking content.
+    # Set CONTENT_SECURITY_POLICY to an empty dictionary or omit it when using REPORT_ONLY.
+    CONTENT_SECURITY_POLICY = {}
+    CONTENT_SECURITY_POLICY_REPORT_ONLY = {
+        'DIRECTIVES': {
+            'default-src': ("'self'",),
+            # 'unsafe-inline' and 'unsafe-eval' are generally bad practices for production.
+            # Only use them in development if absolutely necessary for dev tools (e.g., hot-reloading).
+            # Aim to replace them with nonces or hashes for production.
+            'script-src': ("'self'", "'unsafe-inline'", "'unsafe-eval'"),
+            'style-src': ("'self'", "'unsafe-inline'"),
+            'img-src': ("'self'", "data:"), # Allow base64 encoded images (e.g., small icons)
+            'font-src': ("'self'", "data:"), # Allow base64 encoded fonts
+            # 'ws://127.0.0.1:8000' is for Django's dev server websockets (e.g., LiveReload).
+            # Adjust or remove for production based on your websocket setup.
+            'connect-src': ("'self'", "ws://127.0.0.1:8000"),
+            'base-uri': ("'self'",),
+            'object-src': ("'none'",), # Disallow plugins
+            'frame-ancestors': ("'self'",), # Control embedding in iframes
+            'form-action': ("'self'",), # Restrict form submissions
+            # Add any external CDNs if you use them, e.g.:
+            # 'script-src': ("'self'", "https://cdn.jsdelivr.net", "https://code.jquery.com"),
+            # 'style-src': ("'self'", "https://cdn.jsdelivr.net"),
+        },
+        # Optional: Set a report URI for development to see reports, e.g., to console
+        # 'REPORT_URI': '/csp-report/', # You'd need a view to handle this
+    }
 
-# Example for external CDN resources (uncomment and adjust if needed):
-# CSP_SCRIPT_SRC = ("'self'", "https://cdn.jsdelivr.net", "https://code.jquery.com")
-# CSP_STYLE_SRC = ("'self'", "https://cdn.jsdelivr.net")
+else:
+    # For production (DEBUG=False), you would configure the actual enforced policy here.
+    # Typically, CONTENT_SECURITY_POLICY_REPORT_ONLY would be an empty dict or omitted.
+    CONTENT_SECURITY_POLICY = {
+        'DIRECTIVES': {
+            'default-src': ("'self'",),
+            # In production, avoid 'unsafe-inline' and 'unsafe-eval'.
+            # Use nonces or hashes for inline scripts/styles if absolutely required.
+            'script-src': ("'self'",),
+            'style-src': ("'self'",),
+            'img-src': ("'self'",),
+            'font-src': ("'self'",),
+            'connect-src': ("'self'",),
+            'base-uri': ("'self'",),
+            'object-src': ("'none'",),
+            'frame-ancestors': ("'self'",),
+            'form-action': ("'self'",),
+            # Add any external CDNs if you use them in production:
+            # 'script-src': ("'self'", "https://cdn.jsdelivr.net", "https://code.jquery.com"),
+            # 'style-src': ("'self'", "https://cdn.jsdelivr.net"),
+        },
+        'REPORT_URI': '/csp-report/', # Essential for production to collect violation reports
+        # 'REPORT_ONLY': False, # This key is part of the CONTENT_SECURITY_POLICY dict, as per the documentation
+    }
+    # In production, when enforcing, CONTENT_SECURITY_POLICY_REPORT_ONLY should be an empty dictionary.
+    CONTENT_SECURITY_POLICY_REPORT_ONLY = {}

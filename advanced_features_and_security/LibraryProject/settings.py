@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os # Make sure os is imported for os.path.join
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-h^aag3ia&tm8@7t3+x&_v1w@rn3fwp47@o#!8eq0-nbo-fc5*9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True # For development, keep True. For production, set to False.
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [] # In production, this should contain your domain names, e.g., ['yourdomain.com', 'www.yourdomain.com']
 
 
 # Application definition
@@ -41,12 +42,13 @@ INSTALLED_APPS = [
     'bookshelf',
     'practice_relationships',
     'accounts',
-    'relationship_app', # <--- Add this line
-
+    'relationship_app',
+    'csp', # <--- ADD THIS LINE FOR DJANGO-CSP
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware', # <--- ADD THIS LINE FOR DJANGO-CSP (Place it high in the list)
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,7 +62,7 @@ ROOT_URLCONF = 'temp_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], # Often useful to have a project-level templates directory
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -111,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Addis_Ababa' # Changed from 'UTC' based on previous context
 
 USE_I18N = True
 
@@ -135,14 +137,40 @@ STATIC_ROOT = BASE_DIR / 'staticfiles' # Location where collectstatic will put f
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# LibraryProject/settings.py
-
-# ... existing settings ...
-
 # Authentication Redirect URLs
 LOGIN_REDIRECT_URL = '/' # Redirect to home page after login
 LOGOUT_REDIRECT_URL = '/relationships_app/login/' # Redirect to login page after logout (or '/')
 LOGIN_URL = '/relationships_app/login/' # URL where unauthenticated users are redirected for login
-# MyProject/settings.py
 
 AUTH_USER_MODEL = 'accounts.CustomUser' # 'your_app_name.YourCustomUserClass'
+
+
+# --- Content Security Policy (CSP) Settings ---
+# These settings define what content sources are allowed by your browser.
+# For more details, refer to: https://django-csp.readthedocs.io/en/latest/configuration.html
+# And the CSP spec: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
+
+CSP_DEFAULT_SRC = ("'self'",) # Default source for most content types (scripts, images, etc.)
+CSP_SCRIPT_SRC = ("'self'",) # Allow JavaScript from your own domain
+CSP_STYLE_SRC = ("'self'",) # Allow CSS from your own domain
+CSP_IMG_SRC = ("'self'",) # Allow images from your own domain
+CSP_FONT_SRC = ("'self'",) # Allow fonts from your own domain
+CSP_CONNECT_SRC = ("'self'",) # Allow XHR, WebSockets from your own domain
+CSP_BASE_URI = ("'self'",) # Restrict the `base` element's `href` attribute
+CSP_OBJECT_SRC = ("'none'",) # Disallow plugins (Flash, Java, etc.)
+CSP_FRAME_ANCESTORS = ("'self'",) # Allow embedding of your site in iframes only from your own domain
+CSP_FORM_ACTION = ("'self'",) # Restrict which URLs can be used as the action for HTML form submissions
+
+# Optional: Set a report URI to receive CSP violation reports (e.g., if using a reporting service)
+# CSP_REPORT_URI = '/csp-report/' # You would need a view to handle these reports
+
+# Optional: Use report-only mode in development to test policies without blocking content
+# CSP_REPORT_ONLY = DEBUG # This will send 'Content-Security-Policy-Report-Only' header if DEBUG is True
+
+# Important: If you use CDNs or external resources, you'll need to add them to the relevant directives.
+# Example:
+# CSP_SCRIPT_SRC = ("'self'", "https://cdn.jsdelivr.net", "https://code.jquery.com")
+# CSP_STYLE_SRC = ("'self'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com")
+# CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
+
+# End of CSP Settings

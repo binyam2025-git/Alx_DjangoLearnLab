@@ -7,6 +7,8 @@ from bookshelf import views as bookshelf_views # NEW: Alias for bookshelf views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('form-example/', bookshelf_views.form_example_view, name='form_example'), # <--- This line
+    # ... and your other book-related paths pointing to bookshelf_views
 
     # Your security demo paths (still point to relationship_app_views)
     path('my-form/', relationship_app_views.my_form_view, name='my_form'),
@@ -34,4 +36,5 @@ urlpatterns = [
 
     # Django's authentication URLs
     path('accounts/', include('django.contrib.auth.urls')),
+    
 ]

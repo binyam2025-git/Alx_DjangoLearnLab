@@ -1,34 +1,28 @@
 # C:\Users\user\Alx_DjangoLearnLab\advanced_features_and_security\LibraryProject\bookshelf\admin.py
 
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin # Keep this import
-from .models import CustomUser # Import CustomUser from this app's models
 
-class CustomUserAdmin(UserAdmin):
-    # The 'username' field is not used, so we override the default UserAdmin fieldsets
-    # to remove it and ensure 'email' is the primary identifier.
+# Import models that belong to the 'bookshelf' app and need to be registered in the admin.
+# Based on your previous models.py corrections, 'Book' is a primary model in 'bookshelf'.
+# If 'Author' is also truly defined in 'bookshelf/models.py' and not just 'relationship_app/models.py',
+# then uncomment it. However, typically models are defined in one place.
+from .models import Book
+# from .models import Author # Uncomment if Author model is also specifically in bookshelf/models.py
 
-    # Fieldsets for changing an existing user (detail view)
-    fieldsets = (
-        (None, {'fields': ('email', 'password')}), # Use 'email' instead of 'username'
-        ('Personal info', {'fields': ('date_of_birth', 'profile_photo', 'first_name', 'last_name')}), # Add first_name, last_name if you want to display them
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
-    )
+# --- REMOVED CustomUserAdmin class and CustomUser registration ---
+# These belong in accounts/admin.py, where CustomUser is defined and managed.
+# All lines related to CustomUser import, CustomUserAdmin class,
+# and admin.site.register(CustomUser, CustomUserAdmin) have been removed from this file.
+# ------------------------------------------------------------------
 
-    # Fieldsets for adding a new user
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'password', 'password2'), # Use 'email' instead of 'username'
-        }),
-        ('Personal info', {'fields': ('date_of_birth', 'profile_photo', 'first_name', 'last_name')}), # Add first_name, last_name if you want
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-    )
+# Register your models from the 'bookshelf' app here.
+# This makes them visible and manageable in the Django admin interface.
+admin.site.register(Book)
 
-    # Fields to display in the list view of users
-    list_display = ('email', 'date_of_birth', 'is_staff') # Use 'email' instead of 'username'
-    search_fields = ('email',) # Search by email
-    ordering = ('email',) # Order by email
+# If you uncommented Author above, uncomment this line too.
+# admin.site.register(Author)
 
-admin.site.register(CustomUser, CustomUserAdmin)
+# Example for other models if you were to add them to bookshelf app:
+# from .models import Genre, Tag
+# admin.site.register(Genre)
+# admin.site.register(Tag)
