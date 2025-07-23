@@ -1,16 +1,17 @@
 # C:\Users\user\Alx_DjangoLearnLab\advanced_features_and_security\LibraryProject\relationship_app\views.py
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseForbidden # Add HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import UserCreationForm # Use this or your custom form if you make one
-from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
+from django.contrib.auth.decorators import login_required, user_passes_test, permission_required # Ensure permission_required is here
 from django.contrib.auth import login, authenticate, logout
 from django.views.generic import DetailView, ListView
 from django.conf import settings # Add this import for settings.AUTH_USER_MODEL (if needed)
 
 # Import your models, explicitly CustomUser now
-from .models import Author, Book, Librarian, Library  #CustomUser # Ensure CustomUser is imported
+from .models import Author, Book, Librarian, Library # Make sure Book is imported
+from .forms import BookForm # You'll need to create this later if you don't have it
 
 # Optional: If you use a custom form for registration, define it here or import it.
 # from .forms import CustomUserCreationForm # Example if you create a forms.py
@@ -92,47 +93,53 @@ def xss_demo_view(request):
     context = {'user_input': user_input}
     return render(request, 'relationship_app/xss_demo.html', context)
 
-@permission_required('relationship_app.can_add_book', raise_exception=True)
+# For adding a book (previously add_book_view, now renamed for clarity)
+@login_required
+@permission_required('relationship_app.can_create_book', raise_exception=True)
 def book_add_view(request):
+    # You'll need a form for this. Let's assume you'll create one.
+    # For now, a placeholder to satisfy the view check:
     if request.method == 'POST':
-        # This is where your form processing logic would go
-        # For a basic demo, you might just redirect
-        # For example:
-        # title = request.POST.get('title')
-        # author_id = request.POST.get('author')
-        # library_id = request.POST.get('library')
-        # try:
-        #     author = Author.objects.get(id=author_id)
-        #     library = Library.objects.get(id=library_id)
-        #     Book.objects.create(title=title, author=author, library=library)
-        #     return redirect('add_book_success')
-        # except Exception as e:
-        #     # Handle error, maybe show form again with error message
-        #     pass # For now, just a placeholder
-        return redirect('add_book_success') # Example redirect
-    return render(request, 'relationship_app/book_add.html', {'message': 'Add Book Page'})
+        form = BookForm(request.POST) # You'll need to define this form
+        if form.is_valid():
+            form.save()
+            return redirect('list_books')
+    else:
+        form = BookForm()
+    return render(request, 'relationship_app/book_form.html', {'form': form, 'action': 'Add'})
 
-def add_book_success(request):
+def add_book_success(request): # This view needs no permission as it's just a redirect target
     return HttpResponse("Book added successfully!")
 
+@login_required
+@permission_required('relationship_app.can_view_book', raise_exception=True)
 def list_books(request):
     books = Book.objects.all()
-    return render(request, 'relationship_app/list_books.html', {'books': books})
+    return render(request, 'relationship_app/book_list.html', {'books': books})
 
-@permission_required('relationship_app.can_change_book', raise_exception=True)
+# For editing a book
+@login_required
+@permission_required('relationship_app.can_edit_book', raise_exception=True)
 def book_edit_view(request, pk):
     book = get_object_or_404(Book, pk=pk)
-    # ...
-    return render(request, 'relationship_app/book_edit.html', {'book': book, 'message': f'Edit Book Page for {book.title}'})
+    if request.method == 'POST':
+        form = BookForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
+            return redirect('list_books')
+    else:
+        form = BookForm(instance=book)
+    return render(request, 'relationship_app/book_form.html', {'form': form, 'action': 'Edit'})
 
+# For deleting a book
+@login_required
 @permission_required('relationship_app.can_delete_book', raise_exception=True)
 def book_delete_view(request, pk):
     book = get_object_or_404(Book, pk=pk)
     if request.method == 'POST':
         book.delete()
-        return redirect('list_books') # Redirect after deletion
-    return render(request, 'relationship_app/book_confirm_delete.html', {'book': book, 'message': f'Confirm Delete for {book.title}'})
-
+        return redirect('list_books')
+    return render(request, 'relationship_app/book_confirm_delete.html', {'book': book})
 
 # --- Author, Library, Librarian Views (verify they don't use UserProfile) ---
 def author_list_view(request):

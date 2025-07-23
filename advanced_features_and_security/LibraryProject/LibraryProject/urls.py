@@ -1,36 +1,36 @@
 # C:\Users\user\Alx_DjangoLearnLab\advanced_features_and_security\LibraryProject\LibraryProject\urls.py
+
 from django.contrib import admin
-from django.urls import path, include # <--- ADD ', include' HERE
-from relationship_app import views as security_views # Import views directly
+from django.urls import path, include
+from relationship_app import views as app_views # Changed alias from security_views to app_views for clarity
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Removed: path('relationships_app/', include('relationship_app.urls')),
+    # Your security demo paths (if still needed, adjust as per your project's security demos)
+    path('my-form/', app_views.my_form_view, name='my_form'),
+    path('my-form-unsafe/', app_views.my_form_unsafe_view, name='my_form_unsafe'),
+    path('xss-demo/', app_views.xss_demo_view, name='xss_demo'),
 
-    # Direct paths for the security demonstrations and core app views
-    # Ensure these functions exist in relationship_app/views.py
-    path('my-form/', security_views.my_form_view, name='my_form'),
-    path('my-form-unsafe/', security_views.my_form_unsafe_view, name='my_form_unsafe'),
-    path('xss-demo/', security_views.xss_demo_view, name='xss_demo'),
-    path('add-book/', security_views.book_add_view, name='add_book'), # Make sure this matches `book_add_view` in views.py
-    path('add-book-success/', security_views.add_book_success, name='add_book_success'),
-    path('books/', security_views.list_books, name='list_books'),
+    # Book-related paths with new view names:
+    path('books/', app_views.list_books, name='list_books'),
+    path('books/add/', app_views.book_add_view, name='add_book'), # Use the new view function name
+    path('books/add/success/', app_views.add_book_success, name='add_book_success'),
+    path('books/<int:pk>/edit/', app_views.book_edit_view, name='book_edit'),
+    path('books/<int:pk>/delete/', app_views.book_delete_view, name='book_delete'),
 
-    # Core app views (ensure these are also imported or handled)
-    path('', security_views.home_view, name='home'),
-    path('authors/', security_views.author_list_view, name='author_list'),
-    path('authors/<int:pk>/', security_views.AuthorDetailView.as_view(), name='author_detail'),
-    path('libraries/', security_views.library_list_view, name='library_list'),
-    path('libraries/<int:pk>/', security_views.LibraryDetailView.as_view(), name='library_detail'),
-    path('librarians/<int:pk>/', security_views.librarian_detail_view, name='librarian_detail'),
-    path('register/', security_views.register_view, name='register'),
-    path('admin-view/', security_views.admin_view, name='admin_view'),
-    path('librarian-view/', security_views.librarian_view, name='librarian_view'),
-    path('member-view/', security_views.member_view, name='member_view'),
-    path('book-edit/<int:pk>/', security_views.book_edit_view, name='book_edit'),
-    path('book-delete/<int:pk>/', security_views.book_delete_view, name='book_delete'),
+    # Core app views
+    path('', app_views.home_view, name='home'),
+    path('authors/', app_views.author_list_view, name='author_list'),
+    path('authors/<int:pk>/', app_views.AuthorDetailView.as_view(), name='author_detail'),
+    path('libraries/', app_views.library_list_view, name='library_list'),
+    path('libraries/<int:pk>/', app_views.LibraryDetailView.as_view(), name='library_detail'),
+    path('librarians/<int:pk>/', app_views.librarian_detail_view, name='librarian_detail'),
+    path('register/', app_views.register_view, name='register'),
+    path('admin-view/', app_views.admin_view, name='admin_view'),
+    path('librarian-view/', app_views.librarian_view, name='librarian_view'),
+    path('member-view/', app_views.member_view, name='member_view'),
 
-    # Django's authentication URLs (often included)
-    path('accounts/', include('django.contrib.auth.urls')), # Provides login, logout, password reset, etc.
+    # Django's authentication URLs
+    path('accounts/', include('django.contrib.auth.urls')),
 ]

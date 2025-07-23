@@ -20,10 +20,14 @@ class Book(models.Model):
     library = models.ForeignKey('Library', on_delete=models.CASCADE)
     class Meta:
         permissions = [
-            ("can_add_book", "Can add a new book"),
-            ("can_change_book", "Can change existing book data"),
+             
+            ("can_view_book", "Can view book data"), # For general viewing
+            ("can_create_book", "Can create new books"),
+            ("can_edit_book", "Can edit existing books"),
             ("can_delete_book", "Can delete a book"),
         ]
+        verbose_name = "Book"
+        verbose_name_plural = "Books"
     def __str__(self):
         return self.title
 
