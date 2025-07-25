@@ -168,6 +168,7 @@ EMAIL_PORT = 1025
 DEFAULT_FROM_EMAIL = 'webmaster@yourdomain.com'
 SERVER_EMAIL = 'webmaster@yourdomain.com'
 
+SECUREHSTSSECONDS = 31536000
 
 # Security Headers (Adjusted for DEBUG=True development)
 # When DEBUG is True, you typically don't run over HTTPS, so
