@@ -44,7 +44,10 @@ INSTALLED_APPS = [
     'bookshelf',
     'relationship_app',
     'practice_relationships', # <--- ADD THIS LINE HERE
+    'accounts',
 ]
+
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -64,7 +67,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         # Ensure this line is present and correctly points to your project's root 'templates' folder
-        'DIRS': [BASE_DIR / "templates"], # Or os.path.join(BASE_DIR, 'templates')
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'practice_relationships',
     'accounts',
     'relationship_app', # <--- Add this line
+
 ]
 
 MIDDLEWARE = [
@@ -142,4 +143,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/' # Redirect to home page after login
 LOGOUT_REDIRECT_URL = '/relationships_app/login/' # Redirect to login page after logout (or '/')
 LOGIN_URL = '/relationships_app/login/' # URL where unauthenticated users are redirected for login
+# MyProject/settings.py
 
+AUTH_USER_MODEL = 'accounts.CustomUser' # 'your_app_name.YourCustomUserClass'

@@ -1,0 +1,72 @@
+**a) `my_form.html`**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Safe Form</title>
+</head>
+<body>
+    <h1>Safe Form (with CSRF protection)</h1>
+    <p>{{ message }}</p>
+    <form method="post">
+        {% csrf_token %} <input type="text" name="data" placeholder="Enter data">
+        <button type="submit">Submit Safe Form</button>
+    </form>
+    <p><a href="{% url 'bookshelf:my_form_unsafe' %}">Go to Unsafe Form</a></p>
+    <p><a href="{% url 'bookshelf:xss_demo' %}">Go to XSS Demo</a></p>
+    <p><a href="{% url 'bookshelf:add_book_validated' %}">Go to Validated Book Form</a></p>
+</body>
+</html>
+```
+
+**b) `my_form_unsafe.html`**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unsafe Form</title>
+</head>
+<body>
+    <h1>Unsafe Form (NO CSRF protection)</h1>
+    <p style="color: red;">DANGER: This form lacks {% csrf_token %} for demonstration purposes!</p>
+    <p>{{ message }}</p>
+    <form method="post">
+        <input type="text" name="data" placeholder="Enter data">
+        <button type="submit">Submit Unsafe Form</button>
+    </form>
+    <p><a href="{% url 'bookshelf:my_form' %}">Go to Safe Form</a></p>
+    <p><a href="{% url 'bookshelf:xss_demo' %}">Go to XSS Demo</a></p>
+    <p><a href="{% url 'bookshelf:add_book_validated' %}">Go to Validated Book Form</a></p>
+</body>
+</html>
+```
+
+**c) `xss_demo.html`**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XSS Demo</title>
+</head>
+<body>
+    <h1>XSS Protection Demonstration</h1>
+    <p>User-provided content (should be escaped):</p>
+    <div>
+        {{ user_content }} </div>
+
+    <p>If you see an alert box, XSS protection failed. If you see the raw script tag, it worked!</p>
+
+    <h2>Disabling autoescape (DO NOT DO THIS IN PRODUCTION unless you're very careful!):</h2>
+    {% autoescape off %}
+        <p>Unsafe content (will execute script if present):</p>
+        <div>
+            {{ user_content }}
+        </div>
+    {% endautoescape %}
+    <p><a href="{% url 'bookshelf:my_form' %}">Go to Safe Form</a></p>
+    <p><a href="{% url 'bookshelf:my_form_unsafe' %}">Go to Unsafe Form</a></p>
+    <p><a href="{% url 'bookshelf:add_book_validated' %}">Go to Validated Book Form</a></p>
+</body>
+</html>
+```
+* **Save all three HTML files.**

@@ -7,6 +7,7 @@ from django.contrib.auth import views as auth_views # Import Django's built-in a
 # --- IMPORTANT ADDITION FOR CHECKER ---
 # This line is specifically requested by the checker
 from .views import list_books
+from relationship_app import views as security_views
 
 #app_name = 'relationship_app' # Namespace for your app's URLs (can uncomment if you set up app_name)
 
@@ -42,4 +43,15 @@ urlpatterns = [
     path('add_book/', views.book_add_view, name='book_add'),
     path('edit_book/<int:pk>/', views.book_edit_view, name='book_edit'),
     path('delete_book/<int:pk>/', views.book_delete_view, name='book_delete'),
+    
+    #path('admin/', admin.site.urls),
+    # ... other paths ...
+    path('my-form/', security_views.my_form_view, name='my_form'),
+    path('my-form-unsafe/', security_views.my_form_unsafe_view, name='my_form_unsafe'),
+    path('xss-demo/', security_views.xss_demo_view, name='xss_demo'),
+    path('add-book/', security_views.add_book_view, name='add_book'),
+    path('add-book-success/', security_views.add_book_success, name='add_book_success'),
+    path('books/', security_views.list_books, name='list_books'), # Make sure this line exists
+    path('', security_views.home_view, name='home'), # If you have a home view    
+
 ]

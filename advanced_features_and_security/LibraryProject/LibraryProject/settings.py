@@ -32,7 +32,7 @@ DEBUG = True # Set to True for development ease
 # When DEBUG is False, you must configure ALLOWED_HOSTS.
 # For local testing, '127.0.0.1' and 'localhost' are sufficient.
 # For deployment, you'd add your domain names.
-ALLOWED_HOSTS = ['127.00.1', 'localhost'] # Corrected: '127.0.0.1'
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -52,10 +52,22 @@ INSTALLED_APPS = [
     'relationship_app',
     'practice_relationships',
     'csp', # For Content Security Policy
+    'rest_framework.authtoken',
+    'rest_framework',
 ]
 
 # Configure your custom user model
 AUTH_USER_MODEL = 'accounts.CustomUser' # Points to CustomUser in your 'accounts' app
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication', # Keep SessionAuth for browsable API
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated', # <-- Default permission: only authenticated users
+    ],
+}
 
 
 MIDDLEWARE = [

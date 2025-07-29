@@ -2,15 +2,20 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test, permission_required
-from django.urls import reverse_lazy # Ensure this is imported for redirecting
-from django.contrib.auth.forms import UserCreationForm # Ensure this is here for register_view
-from django.contrib.auth import login as auth_login # Ensure this is here for register_view
-from django.views.generic.list import ListView # Keep ListView if you have other list views or for completeness
+from django.urls import reverse_lazy
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login as auth_login
+from django.views.generic.list import ListView
+from django.http import HttpResponse # Import HttpResponse
 
 # Ensure these specific imports are present
 from .models import Author, Book, Librarian, UserProfile
 from .models import Library # Explicitly separate for checker's literal match
 from django.views.generic.detail import DetailView # Corrected import path as per checker
+from django.views.decorators.csrf import csrf_exempt # For csrf_exempt decorator
+
+# Assuming you have these forms defined in relationship_app/forms.py
+from .forms import MyForm, BookForm
 
 
 # Helper functions for role checks (from previous tasks, keep them)
@@ -134,3 +139,45 @@ def list_books(request): # CHANGED: Function name is now 'list_books'
     books = Book.objects.all().select_related('author') # Optimizes query to get author name
     context = {'books': books}
     return render(request, 'relationship_app/list_books.html', context)
+
+# --- New Security-related Views ---
+def my_form_view(request):
+    if request.method == 'POST':
+        form = MyForm(request.POST)
+        if form.is_valid():
+            # Process the data (e.g., save to DB)
+            message = f"Form submitted successfully! Data: {form.cleaned_data['name']}"
+            return render(request, 'relationship_app/success.html', {'message': message})
+    else:
+        form = MyForm()
+    return render(request, 'relationship_app/my_form.html', {'form': form})
+
+@csrf_exempt # For demonstration of vulnerability ONLY. DO NOT use in production.
+def my_form_unsafe_view(request):
+    if request.method == 'POST':
+        form = MyForm(request.POST)
+        if form.is_valid():
+            message = f"Unsafe Form submitted! Data: {form.cleaned_data['name']}"
+            return render(request, 'relationship_app/success.html', {'message': message})
+    else:
+        form = MyForm()
+    return render(request, 'relationship_app/my_form_unsafe.html', {'form': form})
+
+def xss_demo_view(request):
+    user_input = request.GET.get('q', '<b>Hello from Django!</b>')
+    # Django templates automatically escape HTML by default (unless |safe filter is used)
+    context = {'user_input': user_input}
+    return render(request, 'relationship_app/xss_demo.html', context)
+
+def add_book_view(request):
+    if request.method == 'POST':
+        form = BookForm(request.POST) # Assuming BookForm exists in relationship_app/forms.py
+        if form.is_valid():
+            form.save() # Saves the book to the database
+            return redirect('add_book_success') # Redirect to a success page or back to form
+    else:
+        form = BookForm()
+    return render(request, 'relationship_app/add_book.html', {'form': form})
+
+def add_book_success(request):
+    return HttpResponse("Book added successfully!")

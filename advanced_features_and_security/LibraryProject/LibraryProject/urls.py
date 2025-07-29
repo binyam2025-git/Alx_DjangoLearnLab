@@ -2,39 +2,48 @@
 
 from django.contrib import admin
 from django.urls import path, include
-from relationship_app import views as relationship_app_views # Keep this alias for views that stay here
-from bookshelf import views as bookshelf_views # NEW: Alias for bookshelf views
+
+# IMPORTANT: Import settings for MEDIA_URL and MEDIA_ROOT
+from django.conf import settings
+# IMPORTANT: Import static for serving media/static files in development
+from django.conf.urls.static import static
+from rest_framework.authtoken import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('form-example/', bookshelf_views.form_example_view, name='form_example'), # <--- This line
-    # ... and your other book-related paths pointing to bookshelf_views
 
-    # Your security demo paths (still point to relationship_app_views)
-    path('my-form/', relationship_app_views.my_form_view, name='my_form'),
-    path('my-form-unsafe/', relationship_app_views.my_form_unsafe_view, name='my_form_unsafe'),
-    path('xss-demo/', relationship_app_views.xss_demo_view, name='xss_demo'),
+    # ==============================================================================
+    # Include bookshelf app's API URLs
+    # This means any request starting with 'api/' will be handled by bookshelf/urls.py
+    # ==============================================================================
+    path('api/', include('bookshelf.urls')),
+    path('api-token-auth/', views.obtain_auth_token),
 
-    # Book-related paths: NOW POINT TO bookshelf_views and update name for book_list
-    path('books/', bookshelf_views.book_list, name='book_list'), # UPDATED name and view
-    path('books/add/', bookshelf_views.book_add_view, name='add_book'),
-    path('books/add/success/', bookshelf_views.add_book_success, name='add_book_success'),
-    path('books/<int:pk>/edit/', bookshelf_views.book_edit_view, name='book_edit'),
-    path('books/<int:pk>/delete/', bookshelf_views.book_delete_view, name='book_delete'),
+    # ==============================================================================
+    # Include bookshelf app's regular (non-API) URLs
+    # This means any request starting with 'books/' will be handled by bookshelf/urls.py
+    # This is for your traditional Django views related to books (list, add, edit, delete, form_example)
+    # ==============================================================================
+    path('books/', include('bookshelf.urls')),
 
-    # Core app views (still point to relationship_app_views)
-    path('', relationship_app_views.home_view, name='home'),
-    path('authors/', relationship_app_views.author_list_view, name='author_list'),
-    path('authors/<int:pk>/', relationship_app_views.AuthorDetailView.as_view(), name='author_detail'),
-    path('libraries/', relationship_app_views.library_list_view, name='library_list'),
-    path('libraries/<int:pk>/', relationship_app_views.LibraryDetailView.as_view(), name='library_detail'),
-    path('librarians/<int:pk>/', relationship_app_views.librarian_detail_view, name='librarian_detail'),
-    path('register/', relationship_app_views.register_view, name='register'),
-    path('admin-view/', relationship_app_views.admin_view, name='admin_view'),
-    path('librarian-view/', relationship_app_views.librarian_view, name='librarian_view'),
-    path('member-view/', relationship_app_views.member_view, name='member_view'),
+    # ==============================================================================
+    # Include relationship_app's URLs
+    # This assumes relationship_app handles the root URL ('') and other core paths
+    # like authors, libraries, security demos, user management, etc.
+    # ==============================================================================
+    path('', include('relationship_app.urls')),
 
-    # Django's authentication URLs
+    # ==============================================================================
+    # Django's built-in authentication URLs (for login, logout, password reset, etc.)
+    # ==============================================================================
     path('accounts/', include('django.contrib.auth.urls')),
-    
 ]
+
+# This block MUST come AFTER urlpatterns is defined.
+# It's used during development to serve static and media files.
+# In production, a dedicated web server (like Nginx or Apache) typically handles this.
+if settings.DEBUG:
+    # Serve media files (e.g., uploaded images)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Optional: Serve static files (e.g., CSS, JS, images) if not handled by collectstatic/web server
+    # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

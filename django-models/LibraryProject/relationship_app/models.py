@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User # Import Django's built-in User model
 from django.db.models.signals import post_save # Import signal for automatic profile creation
 from django.dispatch import receiver # Import receiver decorator for signals
+from django.conf import settings # Add this line
 
 # 1. Define Author first, as it has no dependencies on other custom models
 class Author(models.Model):
@@ -60,11 +61,11 @@ class UserProfile(models.Model):
         ('Librarian', 'Librarian'),
         ('Member', 'Member'),
     )
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='Member')
 
     def __str__(self):
-        return f"{self.user.username}'s Profile ({self.role})"
+        return f"Profile for {self.user.username}"
 
 # 6. Signals (assuming you kept them in models.py from previous instructions,
 #    though they are usually in a separate signals.py and imported in apps.py's ready method)
