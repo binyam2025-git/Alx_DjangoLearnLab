@@ -142,5 +142,60 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend', # Make sure this line is exactly as shown
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'EXCEPTION_HANDLER': 'api_project.utils.custom_exceptions.custom_exception_handler', # Add this line
 }
+
+# Alx_DjangoLearnLab/api_project/settings.py (at the very bottom)
+
+# LOGGING CONFIGURATION
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False, # Keep existing loggers
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO', # Log INFO and higher to console
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'level': 'WARNING', # Log WARNING and higher to a file
+            'class': 'logging.FileHandler',
+            'filename': 'django_debug.log', # Log file name
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': { # Django's own logger
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': False, # Don't pass Django logs to root logger
+        },
+        'recipes': { # Logger for your 'recipes' app
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG', # Log DEBUG and higher for your app
+            'propagate': False,
+        },
+        'api_project': { # Logger for your main project code
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        '': { # Root logger
+            'handlers': ['console', 'file'],
+            'level': 'INFO', # Default level for everything else
+        }
+    },
+}
+
+

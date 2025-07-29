@@ -1,0 +1,30 @@
+WARNING 2025-07-29 17:14:05,862 log 10652 20460 Bad Request: /api/recipes/
+WARNING 2025-07-29 17:14:06,097 log 10652 20460 Unauthorized: /api/recipes/
+WARNING 2025-07-29 17:19:04,593 log 1400 12716 Unauthorized: /api/recipes/
+WARNING 2025-07-29 17:23:01,038 log 19064 20780 Bad Request: /api/recipes/
+WARNING 2025-07-29 17:23:01,210 log 19064 20780 Unauthorized: /api/recipes/
+ERROR 2025-07-29 17:29:47,337 log 19720 9304 Internal Server Error: /api/recipes/
+Traceback (most recent call last):
+  File "C:\Users\user\Alx_DjangoLearnLab\venv\lib\site-packages\django\core\handlers\exception.py", line 47, in inner
+    response = get_response(request)
+  File "C:\Users\user\Alx_DjangoLearnLab\venv\lib\site-packages\django\core\handlers\base.py", line 181, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\user\Alx_DjangoLearnLab\venv\lib\site-packages\django\views\decorators\csrf.py", line 54, in wrapped_view
+    return view_func(*args, **kwargs)
+  File "C:\Users\user\Alx_DjangoLearnLab\venv\lib\site-packages\rest_framework\viewsets.py", line 124, in view
+    return self.dispatch(request, *args, **kwargs)
+  File "C:\Users\user\Alx_DjangoLearnLab\venv\lib\site-packages\rest_framework\views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+  File "C:\Users\user\Alx_DjangoLearnLab\venv\lib\site-packages\rest_framework\views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "C:\Users\user\Alx_DjangoLearnLab\venv\lib\site-packages\rest_framework\views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "C:\Users\user\Alx_DjangoLearnLab\venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "C:\Users\user\Alx_DjangoLearnLab\venv\lib\site-packages\rest_framework\mixins.py", line 19, in create
+    self.perform_create(serializer)
+  File "C:\Users\user\Alx_DjangoLearnLab\recipes\views.py", line 33, in perform_create
+    logger.info(f"Attempting to create recipe by user: {self.request.user.username}")
+NameError: name 'logger' is not defined
+WARNING 2025-07-29 17:29:48,054 log 19720 9304 Unauthorized: /api/recipes/
+WARNING 2025-07-29 17:32:58,291 log 6484 5688 Unauthorized: /api/recipes/

@@ -18,6 +18,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     category_detail = CategorySerializer(source='category', read_only=True)
     # Nested serializer for the owner
     owner_detail = RecipeOwnerSerializer(source='owner', read_only=True)
+    owner = serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
         model = Recipe
@@ -28,4 +29,4 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
         # Ensure 'owner' and 'category' are writeable (for POST/PUT)
         # but 'owner_detail' and 'category_detail' are read-only (for GET)
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'owner']
