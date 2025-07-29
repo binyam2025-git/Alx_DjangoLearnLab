@@ -1,11 +1,11 @@
-#from django.shortcuts import render
-
 # ~/Alx_DjangoLearnLab/api_project/api/views.py
 
-from rest_framework import generics # Import generics
-from .models import Book         # Import your Book model
-from .serializers import BookSerializer # Import your BookSerializer
+# IMPORTANT: Change this import from `generics` to `viewsets`
+from rest_framework import viewsets
+from .models import Book
+from .serializers import BookSerializer
 
-class BookList(generics.ListAPIView): # Renamed to BookList as per task
+# Replace the previous BookList class with BookViewSet
+class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
