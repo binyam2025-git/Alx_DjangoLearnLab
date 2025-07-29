@@ -1,6 +1,6 @@
 # bookshelf/serializers.py
 from rest_framework import serializers
-from .models import Book, Author, Comment # Import your Book model
+from .models import Book, Author # Import your Book model
 import datetime # For calculating days since creation
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -29,19 +29,3 @@ class BookSerializer(serializers.ModelSerializer):
         if obj.published_date:
             return (datetime.date.today() - obj.published_date).days
         return None # Or 0, depending on desired behavior
-class CommentSerializer(serializers.ModelSerializer):
-    # Read-only field for the username of the user who made the comment
-    # This assumes your User model has a 'username' field
-    user = serializers.ReadOnlyField(source='user.username')
-    # Display the book's title (optional, you could just show book ID too)
-    book_title = serializers.ReadOnlyField(source='book.title')
-
-    class Meta:
-        model = Comment
-        fields = ['id', 'book', 'book_title', 'user', 'text', 'created_at', 'flagged']
-        read_only_fields = ['created_at', 'flagged'] # 'flagged' will be modified by a custom action
-
-    # If you want to allow posting comments by book ID:
-    def create(self, validated_data):
-        # Ensure 'book' is handled as a primary key or object, not just its title
-        return super().create(validated_data)
