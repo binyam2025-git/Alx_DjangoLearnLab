@@ -1,6 +1,6 @@
 #from django.shortcuts import render
 # api/views.py
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, filters
 from .models import Book
 from .serializers import BookSerializer
 
@@ -15,6 +15,11 @@ class BookListCreate(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     # This permission class allows read-only access to unauthenticated users,
     # but only authenticated users can create new books.
+
+    # Add these lines for filtering, searching, and ordering
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['title', 'author__name']  # Search by book title or author name
+    ordering_fields = ['publication_year', 'title'] # Order by publication year or title
 
 class BookDetailUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
     """
