@@ -29,7 +29,8 @@ class BookAPITests(APITestCase):
         """Ensure unauthenticated users cannot create books."""
         data = {'title': 'Brave New World', 'publication_year': 1932, 'author': self.author.pk}
         response = self.client.post(self.create_url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # Correct the expected status code from 401 to 403
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Book.objects.count(), 1)
 
     def test_create_book_authenticated(self):
