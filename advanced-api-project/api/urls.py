@@ -1,15 +1,23 @@
-
 # api/urls.py
 
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import BookViewSet
+from django.urls import path
+from .views import (
+    BookListView, 
+    BookDetailView, 
+    BookCreateView, 
+    BookUpdateView, 
+    BookDeleteView
+)
 
-# Create a router and register our viewsets with it.
-router = DefaultRouter()
-router.register(r'books', BookViewSet, basename='book')
-
-# The API URLs are now determined automatically by the router.
 urlpatterns = [
-    path('', include(router.urls)),
+    # URL for retrieving a list of all books
+    path('books/', BookListView.as_view(), name='book-list'),
+
+    # URL for creating a new book
+    path('books/create/', BookCreateView.as_view(), name='book-create'),
+
+    # URL for retrieving, updating, or deleting a specific book
+    path('books/<int:pk>/', BookDetailView.as_view(), name='book-detail'),
+    path('books/<int:pk>/update/', BookUpdateView.as_view(), name='book-update'),
+    path('books/<int:pk>/delete/', BookDeleteView.as_view(), name='book-delete'),
 ]
