@@ -1,4 +1,4 @@
-#from django.db import models
+# api/models.py
 from django.db import models
 
 class Author(models.Model):

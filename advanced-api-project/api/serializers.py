@@ -1,3 +1,4 @@
+# api/serializers.py
 from rest_framework import serializers
 from .models import Author, Book
 from datetime import date
@@ -13,8 +14,7 @@ class BookSerializer(serializers.ModelSerializer):
 
     def validate_publication_year(self, value):
         """
-        Custom validation method for the publication_year field.
-        Ensures the publication year is not a future year.
+        Custom validation for the publication_year field.
         """
         current_year = date.today().year
         if value > current_year:
@@ -24,8 +24,7 @@ class BookSerializer(serializers.ModelSerializer):
 class AuthorSerializer(serializers.ModelSerializer):
     """
     Serializer for the Author model.
-    This serializer demonstrates a nested relationship by including
-    a list of all related books for a given author.
+    Includes a nested list of related books.
     """
     books = BookSerializer(many=True, read_only=True)
 
