@@ -57,5 +57,12 @@ class BookListView(generics.ListAPIView):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'author__name']  # Search by book title or author name
     ordering_fields = ['publication_year', 'title'] # Order by publication year or title
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        publication_year = self.request.query_params.get('publication_year')
+        if publication_year:
+            queryset = queryset.filter(publication_year=publication_year)
+        return queryset
 
 
