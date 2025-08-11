@@ -5,6 +5,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.models import User
 from .models import Post
 from .forms import CustomUserCreationForm, UserUpdateForm
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     return render(request, 'blog/base.html')
