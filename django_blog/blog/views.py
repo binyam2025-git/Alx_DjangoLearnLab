@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from .models import Post, Comment
 from .forms import CustomUserCreationForm, UserUpdateForm, CommentForm
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 def home(request):
     return render(request, 'blog/base.html')
@@ -73,8 +74,14 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
-    pass
+        response = super().form_valid(form)
+        tags_string = self.request.POST.get('tags', '')
+        tag_names = [name.strip() for name in tags_string.split(',') if name.strip()]
+
+        for tag_name in tag_names:
+            tag, created = Tag.objects.get_or_create(name=tag_name)
+            self.object.tags.add(tag)
+        return response
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
@@ -82,13 +89,27 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'blog/post_form.html'
     success_url = '/posts/'
 
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['tags'] = ', '.join(self.object.tags.values_list('name', flat=True))
+        return initial
+
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        self.object.tags.clear()
+        tags_string = self.request.POST.get('tags', '')
+        tag_names = [name.strip() for name in tags_string.split(',') if name.strip()]
+
+        for tag_name in tag_names:
+            tag, created = Tag.objects.get_or_create(name=tag_name)
+            self.object.tags.add(tag)
+        return response
 
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
 
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
@@ -110,6 +131,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
+
 
     def get_success_url(self):
         return reverse('post_detail', kwargs={'pk': self.object.post.pk})
@@ -142,3 +164,37 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return self.object.post.get_absolute_url()
+
+class TaggedPostListView(ListView):
+    model = Post
+    template_name = 'blog/tagged_posts.html'
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        return Post.objects.filter(tags__name__icontains=self.kwargs.get('tag_name')).order_by('-date_posted')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tag_name'] = self.kwargs.get('tag_name')
+        return context
+
+# New search view
+class SearchResultsView(ListView):
+    model = Post
+    template_name = 'blog/search_results.html'
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        if query:
+            return Post.objects.filter(
+                Q(title__icontains=query) | 
+                Q(content__icontains=query) | 
+                Q(tags__name__icontains=query)
+            ).distinct()
+        return Post.objects.none()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['query'] = self.request.GET.get('q')
+        return context
