@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Django Blog</title>
+    <meta charset="UTF-8">
+    <title>Django Blog</title>
 </head>
 <body>
-    {# The following search form is commented out until the URL is created #}
-    {# <form class="search-form" action="{% url 'search_results' %}" method="get"> #}
-    {#     <input type="text" name="q" placeholder="Search posts..." /> #}
-    {#     <button type="submit">Search</button> #}
-    {# </form> #}
-    <h1>My Blog</h1>
-    {% block content %}
-    {% endblock %}
+    <nav>
+        <a href="{% url 'blog-home' %}">Home</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'post-create' %}">New Post</a>
+            <a href="{% url 'profile' %}">Profile</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'register' %}">Register</a>
+        {% endif %}
+    </nav>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
 </body>
 </html>
