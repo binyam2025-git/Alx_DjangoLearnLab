@@ -130,4 +130,6 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # django_blog/settings.py
-LOGIN_REDIRECT_URL = '/profile/'
+#LOGIN_REDIRECT_URL = '/profile/'
+LOGIN_REDIRECT_URL = 'profile'
+LOGOUT_REDIRECT_URL = 'blog-home'

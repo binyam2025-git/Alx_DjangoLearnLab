@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<form class="search-form" action="{% url 'search_results' %}" method="get">
-    <input type="text" name="q" placeholder="Search posts..." />
-    <button type="submit">Search</button>
-</form>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Django Blog</title>
+    <meta charset="UTF-8">
+    <title>Django Blog</title>
 </head>
 <body>
-    <h1>My Blog</h1>
-    {% block content %}
-    {% endblock %}
+    {# The following search form is commented out until the URL is created #}
+    {# <form class="search-form" action="{% url 'search_results' %}" method="get"> #}
+    {#     <input type="text" name="q" placeholder="Search posts..." /> #}
+    {#     <button type="submit">Search</button> #}
+    {# </form> #}
+    <h1>My Blog</h1>
+    {% block content %}
+    {% endblock %}
 </body>
 </html>
