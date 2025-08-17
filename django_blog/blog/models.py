@@ -4,6 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.urls import reverse
 from taggit.managers import TaggableManager
+from django.contrib.auth.models import User
 
 class Post(models.Model):
     title = models.CharField(max_length=200)
