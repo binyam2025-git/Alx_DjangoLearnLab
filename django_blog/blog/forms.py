@@ -2,7 +2,8 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import Post, Comment, Tag # Import the Comment model
+from .models import Post, Comment 
+#Tag # Import the Comment model
 from taggit.forms import TagWidget
 
 class CustomUserCreationForm(UserCreationForm):
