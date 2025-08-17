@@ -13,6 +13,7 @@ from .models import Post, Comment
 from .forms import CustomUserCreationForm, UserUpdateForm, PostForm, CommentForm
 from django.db.models import Q
 from taggit.models import Tag
+from django.contrib.auth.decorators import login_required
 
 # Authentication Views
 def register(request):
