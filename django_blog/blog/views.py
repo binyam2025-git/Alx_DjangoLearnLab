@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import (
@@ -131,6 +130,15 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.object.post.get_absolute_url()
 
 # Search and Tagging Views
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/posts_by_tag.html'
+    context_object_name = 'posts'
+    ordering = ['-published_date']
+
+    def get_queryset(self):
+        return Post.objects.filter(tags__slug=self.kwargs.get('tag_slug'))
+
 class SearchView(ListView):
     model = Post
     template_name = 'blog/search_results.html'
@@ -146,12 +154,3 @@ class SearchView(ListView):
                 Q(tags__name__icontains=query)
             ).distinct()
         return Post.objects.none()
-
-def posts_by_tag(request, tag_slug):
-    tag = get_object_or_404(Tag, slug=tag_slug)
-    posts = Post.objects.filter(tags__in=[tag]).order_by('-published_date')
-    context = {
-        'tag': tag,
-        'posts': posts
-    }
-    return render(request, 'blog/posts_by_tag.html', context)
