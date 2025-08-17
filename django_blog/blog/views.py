@@ -12,6 +12,8 @@ from django.views.generic import (
 )
 from .models import Post, Comment
 from .forms import CustomUserCreationForm, UserUpdateForm, PostForm, CommentForm
+from django.db.models import Q
+from taggit.models import Tag
 
 # Authentication Views
 def register(request):
@@ -127,3 +129,29 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def get_success_url(self):
         return self.object.post.get_absolute_url()
+
+# Search and Tagging Views
+class SearchView(ListView):
+    model = Post
+    template_name = 'blog/search_results.html'
+    context_object_name = 'results'
+    ordering = ['-published_date']
+
+    def get_queryset(self):
+        query = self.request.GET.get('q')
+        if query:
+            return Post.objects.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(tags__name__icontains=query)
+            ).distinct()
+        return Post.objects.none()
+
+def posts_by_tag(request, tag_slug):
+    tag = get_object_or_404(Tag, slug=tag_slug)
+    posts = Post.objects.filter(tags__in=[tag]).order_by('-published_date')
+    context = {
+        'tag': tag,
+        'posts': posts
+    }
+    return render(request, 'blog/posts_by_tag.html', context)
