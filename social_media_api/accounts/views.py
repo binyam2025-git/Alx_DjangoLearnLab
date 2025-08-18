@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404
 from .models import CustomUser
 from .serializers import CustomUserSerializer
 from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated
 
 User = get_user_model()
 
