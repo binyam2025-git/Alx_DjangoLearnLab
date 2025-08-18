@@ -1,26 +1,34 @@
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from notifications.models import Notification
-from .models import Post, Like
 from rest_framework.views import APIView
+from rest_framework import filters
+
+from notifications.models import Notification
+from .models import Post, Comment, Like
+from .serializers import CommentSerializer, PostSerializer, PostDetailSerializer
 
 User = get_user_model()
 
-class PostListCreateView(generics.ListCreateAPIView):
-    queryset = Post.objects.all()
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['title', 'content']
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostDetailSerializer
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all().order_by('-created_at')
+    serializer_class = CommentSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
 
 class FeedView(generics.ListAPIView):
     serializer_class = PostSerializer
@@ -36,11 +44,10 @@ class LikePostView(APIView):
 
     def post(self, request, pk, *args, **kwargs):
         post = get_object_or_404(Post, pk=pk)
-        
+
         like, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if created:
-            # Create a notification for the post's author
             if request.user != post.author:
                 Notification.objects.create(
                     recipient=post.author,
@@ -54,7 +61,7 @@ class LikePostView(APIView):
 
     def delete(self, request, pk, *args, **kwargs):
         post = get_object_or_404(Post, pk=pk)
-        
+
         try:
             like = Like.objects.get(user=request.user, post=post)
             like.delete()
