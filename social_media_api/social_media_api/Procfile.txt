@@ -1,0 +1,2 @@
+# In your Procfile
+web: gunicorn social_media_api.wsgi

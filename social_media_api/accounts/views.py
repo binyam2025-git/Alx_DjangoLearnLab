@@ -1,3 +1,5 @@
+
+from accounts.models import CustomUser
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework import permissions
@@ -6,7 +8,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from .serializers import CustomUserSerializer, TokenSerializer
-from accounts.models import CustomUser
+
+
+
 
 # Get the active user model for consistent references
 User = get_user_model()
@@ -53,3 +57,8 @@ class FollowUserView(generics.GenericAPIView):
 
         request.user.following.remove(user_to_unfollow)
         return Response({'status': 'unfollowed'}, status=status.HTTP_204_NO_CONTENT)
+
+class ProfileView(generics.RetrieveAPIView):
+    # Your profile view logic goes here.
+    # You'll need to define queryset and serializer_class.
+    pass

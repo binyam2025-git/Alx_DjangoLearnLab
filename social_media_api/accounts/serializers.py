@@ -26,3 +26,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'username', 'email']
 
 # ... (the rest of your serializers and models) ...
+
+class TokenSerializer(serializers.Serializer):
+    """
+    This serializer is used to return an authentication token.
+    """
+    token = serializers.CharField(max_length=255)
