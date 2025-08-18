@@ -1,5 +1,6 @@
 # posts/views.py
 
+from django.contrib.auth import get_user_model
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from .models import Post
@@ -12,6 +13,8 @@ from notifications.models import Notification # Import Notification model
 from .models import Post, Like # Import Post and Like models
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
+
+User = get_user_model()
 
 class PostListCreateView(generics.ListCreateAPIView):
     queryset = Post.objects.all()
@@ -38,7 +41,7 @@ class FeedView(generics.ListAPIView):
 class LikePostView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, pk):
+    def post(self, request, pk, *args, **kwargs):
         post = get_object_or_404(Post, pk=pk)
         user = request.user
         like, created = Like.objects.get_or_create(user=user, post=post)

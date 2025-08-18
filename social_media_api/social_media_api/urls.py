@@ -18,10 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-
+router = DefaultRouter()
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
+    #path('api-auth/', include('rest_framework.urls')),
     path('api/', include('accounts.urls')),
     path('api/', include('posts.urls')),
+    path('api/posts/', include('posts.urls')),
+    path('api/notifications/', include('notifications.urls')),
+    path('api/accounts/', include('accounts.urls')),
 ]
