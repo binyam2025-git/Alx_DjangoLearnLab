@@ -1,50 +1,48 @@
-from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
-from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework import viewsets, permissions, status, generics
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework import filters
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
 
-from notifications.models import Notification
 from .models import Post, Comment, Like
-from .serializers import CommentSerializer, PostSerializer, PostDetailSerializer
+from .serializers import PostSerializer, CommentSerializer
+from notifications.models import Notification
 
 User = get_user_model()
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'content']
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
+        
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all().order_by('-created_at')
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
 class FeedView(generics.ListAPIView):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         following_users = user.following.all()
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
 
-class LikePostView(APIView):
-    permission_classes = [IsAuthenticated]
+class LikePostView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk, *args, **kwargs):
         post = get_object_or_404(Post, pk=pk)
-
+        
         like, created = Like.objects.get_or_create(user=request.user, post=post)
 
         if created:
@@ -61,7 +59,7 @@ class LikePostView(APIView):
 
     def delete(self, request, pk, *args, **kwargs):
         post = get_object_or_404(Post, pk=pk)
-
+        
         try:
             like = Like.objects.get(user=request.user, post=post)
             like.delete()
