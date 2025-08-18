@@ -7,12 +7,12 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CustomUserSerializer
+from .serializers import CustomUserSerializer, RegisterSerializer
 from .models import CustomUser
 
 class RegisterView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = RegisterSerializer
 
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
