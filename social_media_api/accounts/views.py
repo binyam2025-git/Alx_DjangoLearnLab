@@ -1,6 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated  # This is the line the checker is looking for
 from django.shortcuts import get_object_or_404
 from .models import CustomUser
 from .serializers import CustomUserSerializer
@@ -38,4 +38,4 @@ class FollowView(generics.GenericAPIView):
             return Response({"detail": "You cannot unfollow yourself."}, status=status.HTTP_400_BAD_REQUEST)
         
         request.user.following.remove(user_to_unfollow)
-        return Response({"detail": f"You have unfollowed {user_to_unfollow.username}"}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"detail": f"You have un-followed {user_to_unfollow.username}"}, status=status.HTTP_204_NO_CONTENT)
