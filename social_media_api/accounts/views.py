@@ -1,30 +1,26 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from .models import CustomUser
-from .serializers import CustomUserSerializer
 from django.contrib.auth import get_user_model
+from .serializers import CustomUserSerializer
 
-# Get the active user model for consistent references
 User = get_user_model()
 
 class RegisterView(generics.CreateAPIView):
-    queryset = CustomUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    authentication_classes = []
     permission_classes = []
 
 class ProfileView(generics.RetrieveUpdateAPIView):
-    queryset = CustomUser.objects.all()
+    queryset = User.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
 
-class FollowView(APIView):
+class FollowView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, user_id):
