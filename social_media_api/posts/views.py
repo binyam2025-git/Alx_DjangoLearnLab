@@ -1,68 +1,47 @@
-from rest_framework import viewsets, permissions, status, generics
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
-from rest_framework import filters
 from django.shortcuts import get_object_or_404
-from django.contrib.auth import get_user_model
+from .models import Post
+from .serializers import PostSerializer
+from django.db.models import Q
+from accounts.models import CustomUser
 
-from .models import Post, Comment, Like
-from .serializers import PostSerializer, CommentSerializer
-from notifications.models import Notification
-
-User = get_user_model()
-
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all().order_by('-created_at')
+class PostListCreateView(generics.ListCreateAPIView):
+    queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['title', 'content']
+    permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-        
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().order_by('-created_at')
-    serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+
+class PostDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return get_object_or_404(Post, pk=self.kwargs['pk'])
 
 class FeedView(generics.ListAPIView):
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        following_users = user.following.all()
-        return Post.objects.filter(author__in=following_users).order_by('-created_at')
+        following = self.request.user.following.all()
+        return Post.objects.filter(Q(author__in=following) | Q(author=self.request.user)).order_by('-created_at')
 
 class LikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, pk, *args, **kwargs):
+    def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
-        
-        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        post.likes.add(request.user)
+        return Response({'status': 'post liked'}, status=status.HTTP_200_OK)
 
-        if created:
-            if request.user != post.author:
-                Notification.objects.create(
-                    recipient=post.author,
-                    actor=request.user,
-                    verb="liked",
-                    target=post
-                )
-            return Response({"detail": "Post liked."}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({"detail": "Post already liked."}, status=status.HTTP_400_BAD_REQUEST)
+class UnlikePostView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
 
-    def delete(self, request, pk, *args, **kwargs):
+    def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
-        
-        try:
-            like = Like.objects.get(user=request.user, post=post)
-            like.delete()
-            return Response({"detail": "Post unliked."}, status=status.HTTP_200_OK)
-        except Like.DoesNotExist:
-            return Response({"detail": "Post is not liked."}, status=status.HTTP_400_BAD_REQUEST)
+        post.likes.remove(request.user)
+        return Response({'status': 'post unliked'}, status=status.HTTP_200_OK)

@@ -1,13 +1,13 @@
 
 from accounts.models import CustomUser
-from rest_framework import generics, status
+from rest_framework import generics, status, permissions
 from rest_framework.response import Response
-from rest_framework import permissions
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from .serializers import CustomUserSerializer, TokenSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 
@@ -23,8 +23,8 @@ class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        
         user = authenticate(username=username, password=password)
+
         if user is not None:
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
@@ -59,6 +59,11 @@ class FollowUserView(generics.GenericAPIView):
         return Response({'status': 'unfollowed'}, status=status.HTTP_204_NO_CONTENT)
 
 class ProfileView(generics.RetrieveAPIView):
-    # Your profile view logic goes here.
-    # You'll need to define queryset and serializer_class.
-    pass
+    # You will need to define a queryset and serializer later.
+    # This is just a placeholder to resolve the NameError.
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = get_user_model().objects.all()
+    serializer_class = CustomUserSerializer
+    
+    def get_object(self):
+        return self.request.user
