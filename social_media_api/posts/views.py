@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Post, Like, Comment  # Ensure Comment is imported
+from .models import Post, Like, Comment, Notification   # Ensure Comment is imported
 from .serializers import PostSerializer, CommentSerializer  # Ensure CommentSerializer is imported
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -18,6 +18,21 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def like_post(self, request, pk=None):
+        post = get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+        if created:
+            # Create a notification for the post author
+            Notification.objects.create(
+                user=post.author,
+                message=f"{request.user.username} liked your post."
+            )
+            return Response({"message": "Post liked."}, status=201)
+        else:
+            return Response({"message": "You already liked this post."}, status=400)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
