@@ -1,7 +1,9 @@
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Post
+from .models import Post, Like
+from notifications.models import Notification
+from django.contrib.contenttypes.models import ContentType
 from .serializers import PostSerializer
 from django.db.models import Q
 from accounts.models import CustomUser
@@ -36,13 +38,29 @@ class LikePostView(generics.GenericAPIView):
 
     def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
-        post.likes.add(request.user)
-        return Response({'status': 'post liked'}, status=status.HTTP_200_OK)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+
+        if created:
+            # Create a notification for the post author
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb='liked your post',
+                target_ct=ContentType.objects.get_for_model(Post),
+                target_id=post.id
+            )
+            return Response({"message": "Post liked!"}, status=201)
+        
+        return Response({"message": "You already liked this post!"}, status=400)
 
 class UnlikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
         post = get_object_or_404(Post, pk=pk)
-        post.likes.remove(request.user)
-        return Response({'status': 'post unliked'}, status=status.HTTP_200_OK)
+        
+        # Get the Like object or return a 404 if not found
+        like = get_object_or_404(Like, user=request.user, post=post)
+        like.delete()
+        
+        return Response({"message": "Post unliked!"}, status=204)
