@@ -7,6 +7,11 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from .serializers import UserSerializer
 
+class UserListView(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated] 
+
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserSerializer
 
