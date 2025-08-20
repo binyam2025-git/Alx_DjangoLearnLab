@@ -28,7 +28,8 @@ class FeedView(generics.ListAPIView):
 
     def get_queryset(self):
         #following = self.request.user.following.all()
-        return Post.objects.filter(author__in=self.request.user.following.all()).order_by('-created_at')
+        following_users = self.request.user.following.all()
+        return Post.objects.filter(author__in=following_users).order_by('-created_at')
 
 class LikePostView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
