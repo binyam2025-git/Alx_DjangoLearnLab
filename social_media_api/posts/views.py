@@ -16,6 +16,10 @@ class PostViewSet(viewsets.ModelViewSet):
         # Filter posts by those users
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
 
+    def get_all_posts(self):
+        # This method returns all posts
+        return Post.objects.all()
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
